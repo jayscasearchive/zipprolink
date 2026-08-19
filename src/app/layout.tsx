@@ -30,6 +30,11 @@ export const metadata: Metadata = {
     "Houston locksmith cost",
     "Austin locksmith estimate",
   ],
+  verification: {
+    other: {
+      "msvalidate.01": "D27D217E588826A25341EA6F53D5DC3D",
+    },
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
