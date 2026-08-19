@@ -27,7 +27,9 @@ export function ReferralDisclaimer({
       {!compact ? (
         <p className="mt-2 text-[11px] leading-5 sm:text-xs">{copy.tcpaDisclaimer}</p>
       ) : (
-        <p className="mt-1 text-[10px] leading-4">{copy.dpsShort}</p>
+        <p className="mt-1 text-[10px] leading-4">
+          {copy.dpsShort} {copy.tcpaDisclaimer}
+        </p>
       )}
     </div>
   );

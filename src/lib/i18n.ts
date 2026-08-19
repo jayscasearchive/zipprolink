@@ -1,3 +1,5 @@
+import type { ServiceCategory } from "@/lib/types";
+
 export const LOCALES = ["en", "es"] as const;
 export const DEFAULT_LOCALE = "en" as const;
 
@@ -28,12 +30,42 @@ export type LocalePhone = {
   tel: string;
 };
 
-export function getLocalePhone(locale: AppLocale): LocalePhone {
-  const did = locale === "es" ? PHONE_DID.es : PHONE_DID.en;
+function normalizeE164(value: string | null | undefined, fallback: string) {
+  if (!value?.trim()) {
+    return fallback;
+  }
+  const digits = value.replace(/\D/g, "");
+  if (digits.length === 11 && digits.startsWith("1")) {
+    return `+${digits}`;
+  }
+  if (digits.length === 10) {
+    return `+1${digits}`;
+  }
+  if (value.trim().startsWith("+") && digits.length >= 10) {
+    return `+${digits}`;
+  }
+  return fallback;
+}
+
+function formatDidDisplay(e164: string, fallback: string) {
+  const digits = e164.replace(/\D/g, "");
+  if (digits.length === 11 && digits.startsWith("1")) {
+    return `${digits.slice(0, 1)}-${digits.slice(1, 4)}-${digits.slice(4, 7)}-${digits.slice(7)}`;
+  }
+  return fallback;
+}
+
+export function getLocalePhone(
+  locale: AppLocale,
+  service?: Pick<ServiceCategory, "phone_en" | "phone_es"> | null,
+): LocalePhone {
+  const fallback = locale === "es" ? PHONE_DID.es : PHONE_DID.en;
+  const raw = locale === "es" ? service?.phone_es : service?.phone_en;
+  const e164 = normalizeE164(raw, fallback.e164);
   return {
-    display: did.display,
-    e164: did.e164,
-    tel: `tel:${did.e164}`,
+    display: formatDidDisplay(e164, fallback.display),
+    e164,
+    tel: `tel:${e164}`,
   };
 }
 
@@ -76,7 +108,7 @@ type Dictionary = {
 export const dictionaries: Record<AppLocale, Dictionary> = {
   en: {
     htmlLang: "en",
-    ivr: "Connects in 1-tap: Press 1 for Emergency Dispatch",
+    ivr: "Connects in 1-tap: Press 1 for Emergency Lockout / 2 for Commercial. Live dispatchers ready.",
     callNow: "Call Now",
     stickyBadges: [
       "24/7 Live Dispatch",
@@ -84,11 +116,11 @@ export const dictionaries: Record<AppLocale, Dictionary> = {
       "Direct Tech Connection",
     ],
     referralDisclaimer:
-      "ZipProLink is a free referral service that connects users with local professional service providers. ZipProLink is not a locksmith company licensed by the Texas Department of Public Safety Private Security Bureau (TX DPS PSB). All contractors are independent and ZipProLink does not warrant or guarantee any work performed. It is the responsibility of the homeowner to verify that the hired contractor furnishes the necessary license and insurance required for the work being performed.",
+      "ZipProLink is a free referral matching service that connects homeowners and drivers with independent, licensed local service technicians. ZipProLink does not directly provide locksmith, plumbing, or emergency services, nor does it employ technicians. All service providers are independent contractors responsible for maintaining their own licensing (including TX DPS PSB compliance) and insurance.",
     tcpaDisclaimer:
       "Calls may be recorded for quality and training purposes.",
     dpsShort:
-      "TX DPS PSB referral service — verify contractor license and insurance before work begins.",
+      "TX DPS PSB referral matching service — independent contractors; verify license and insurance before work begins.",
     homeTagline: "24/7 Emergency Locksmith Cost & Dispatch · Texas",
     homeH1: (year) =>
       `${year} locksmith cost & 24/7 emergency dispatch in Texas, by ZIP.`,
@@ -137,7 +169,7 @@ export const dictionaries: Record<AppLocale, Dictionary> = {
   },
   es: {
     htmlLang: "es",
-    ivr: "Conexión directa: Presione 1 para atención en español",
+    ivr: "Conexión directa: Presione 1 para cerrajería de emergencia. Operadores listos.",
     callNow: "Llamar ahora",
     stickyBadges: [
       "Despacho en vivo 24/7",
@@ -145,11 +177,11 @@ export const dictionaries: Record<AppLocale, Dictionary> = {
       "Conexión directa con el técnico",
     ],
     referralDisclaimer:
-      "ZipProLink es un servicio de referidos gratuito que conecta a los usuarios con proveedores locales. ZipProLink no es una empresa de cerrajería con licencia de la Texas Department of Public Safety Private Security Bureau (TX DPS PSB). Todos los contratistas son independientes y ZipProLink no garantiza ningún trabajo realizado. Es responsabilidad del propietario verificar que el contratista contratado cuente con la licencia y el seguro requeridos para el trabajo.",
+      "ZipProLink is a free referral matching service that connects homeowners and drivers with independent, licensed local service technicians. ZipProLink does not directly provide locksmith, plumbing, or emergency services, nor does it employ technicians. All service providers are independent contractors responsible for maintaining their own licensing (including TX DPS PSB compliance) and insurance.",
     tcpaDisclaimer:
-      "Las llamadas pueden grabarse con fines de calidad y capacitación.",
+      "Calls may be recorded for quality and training purposes.",
     dpsShort:
-      "Servicio de referidos TX DPS PSB — verifique licencia y seguro del contratista antes de iniciar el trabajo.",
+      "Servicio de referidos TX DPS PSB — contratistas independientes; verifique licencia y seguro antes de iniciar el trabajo.",
     homeTagline: "Costo y despacho de cerrajero de emergencia 24/7 · Texas",
     homeH1: (year) =>
       `${year} costo de cerrajero y despacho de emergencia 24/7 en Texas, por ZIP.`,

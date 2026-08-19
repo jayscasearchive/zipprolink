@@ -30,14 +30,28 @@ export type CityStaticParam = {
   city: string;
 };
 
+const SERVICE_SELECT_WITH_DID =
+  "id, slug, name, avg_price_min, avg_price_max, avg_response_time, is_active, created_at, phone_en, phone_es";
+const SERVICE_SELECT_BASE =
+  "id, slug, name, avg_price_min, avg_price_max, avg_response_time, is_active, created_at";
+
 export async function getServiceBySlug(
   slug: string,
 ): Promise<ServiceCategory | null> {
+  const withDid = await supabase
+    .from("service_categories")
+    .select(SERVICE_SELECT_WITH_DID)
+    .eq("slug", slug)
+    .eq("is_active", true)
+    .maybeSingle();
+
+  if (!withDid.error) {
+    return withDid.data;
+  }
+
   const { data, error } = await supabase
     .from("service_categories")
-    .select(
-      "id, slug, name, avg_price_min, avg_price_max, avg_response_time, is_active, created_at",
-    )
+    .select(SERVICE_SELECT_BASE)
     .eq("slug", slug)
     .eq("is_active", true)
     .maybeSingle();

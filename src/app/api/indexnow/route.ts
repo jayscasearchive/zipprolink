@@ -1,29 +1,19 @@
 import { NextResponse } from "next/server";
 import { SITE_URL } from "@/lib/constants";
-import { getPhaseCoverageZips } from "@/lib/directory";
-import { INDEXNOW_ENDPOINT, INDEXNOW_KEY } from "@/lib/indexnow";
-import { directoryPath } from "@/lib/paths";
-import { currentPhaseService } from "@/lib/ssot";
+import {
+  INDEXNOW_ENDPOINT,
+  INDEXNOW_KEY,
+  INDEXNOW_KEY_FILE,
+} from "@/lib/indexnow";
+import { getSitemapUrlList } from "@/lib/sitemap-urls";
 
 async function submitIndexNow() {
-  const service = currentPhaseService();
-  const zips = await getPhaseCoverageZips();
-  const urlList = zips.map(
-    (zip) =>
-      `${SITE_URL}${directoryPath({
-        locale: "en",
-        service: service.slug,
-        state: zip.state_id,
-        city: zip.city,
-        zip: zip.zip_code,
-      })}`,
-  );
-
+  const urlList = await getSitemapUrlList();
   const host = new URL(SITE_URL).host;
   const payload = {
     host,
     key: INDEXNOW_KEY,
-    keyLocation: `${SITE_URL}/${INDEXNOW_KEY}.txt`,
+    keyLocation: `${SITE_URL}/${INDEXNOW_KEY_FILE}`,
     urlList,
   };
 

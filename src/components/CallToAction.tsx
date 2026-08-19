@@ -1,18 +1,25 @@
 import { Phone } from "lucide-react";
 import { ReferralDisclaimer } from "@/components/ReferralDisclaimer";
-import { getDictionary, getLocalePhone, type AppLocale } from "@/lib/i18n";
+import {
+  getDictionary,
+  getLocalePhone,
+  type AppLocale,
+} from "@/lib/i18n";
+import type { ServiceCategory } from "@/lib/types";
 
 type CallToActionProps = {
   locale: AppLocale;
   variant?: "header" | "hero" | "sticky" | "footer";
+  service?: ServiceCategory | null;
 };
 
 export function CallToAction({
   locale,
   variant = "hero",
+  service,
 }: CallToActionProps) {
   const copy = getDictionary(locale);
-  const phone = getLocalePhone(locale);
+  const phone = getLocalePhone(locale, service);
   const isHeader = variant === "header";
   const isSticky = variant === "sticky";
   const isFooter = variant === "footer";

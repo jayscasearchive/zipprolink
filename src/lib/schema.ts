@@ -58,7 +58,7 @@ export function serializeJsonLd(json: unknown) {
   return JSON.stringify(json).replace(/</g, "\\u003c");
 }
 
-export function buildEmergencyServiceSchema(
+export function buildPageJsonLd(
   data: DirectoryPageData,
   variation: PageVariation,
   pageUrl: string,
@@ -66,7 +66,7 @@ export function buildEmergencyServiceSchema(
 ) {
   const shortName = shortServiceName(data.service);
   const geo = toGeoCoordinates(data.zip);
-  const phone = getLocalePhone(locale);
+  const phone = getLocalePhone(locale, data.service);
   const address = {
     "@type": "PostalAddress" as const,
     addressLocality: data.zip.city,
@@ -75,71 +75,82 @@ export function buildEmergencyServiceSchema(
     addressCountry: "US",
   };
 
-  return {
-    "@context": "https://schema.org",
-    "@type": ["EmergencyService", "Locksmith"],
-    name: `${SITE_NAME} 24/7 Emergency ${shortName}`,
-    description: variation.metaDescription,
-    url: pageUrl,
-    telephone: phone.e164,
-    priceRange: priceRange(data.service),
-    areaServed: address,
-    address,
-    ...(geo ? { geo } : {}),
-    openingHoursSpecification: {
-      "@type": "OpeningHoursSpecification",
-      dayOfWeek: [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-        "Sunday",
-      ],
-      opens: "00:00",
-      closes: "23:59",
+  const pricingFaqs = variation.jobEstimates.map((job) => ({
+    "@type": "Question",
+    name: `What does ${job.job} cost in ${data.zip.city}, ${data.zip.state_id} ${data.zip.zip_code}?`,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: `Typical ${job.job.toLowerCase()} cost in ${data.zip.zip_code} is ${job.price}. Dispatch time is about ${job.time}. ${job.note}`,
     },
-    offers: {
-      "@type": "Offer",
-      url: pageUrl,
-      availability: "https://schema.org/InStock",
-      priceCurrency: "USD",
-      priceSpecification: toPriceSpecification(
-        data.service.avg_price_min,
-        data.service.avg_price_max,
-      ),
-    },
-    hasOfferCatalog: {
-      "@type": "OfferCatalog",
-      name: `${shortName} cost ranges in ${locationLabel(data.zip)}`,
-      itemListElement: variation.jobEstimates.map((job) => {
-        const priceSpecification = parseUsdRange(job.price);
-        return {
-          "@type": "Offer",
-          itemOffered: {
-            "@type": "Service",
-            name: job.job,
-          },
-          description: `${job.note}. Dispatch ${job.time}.`,
-          ...(priceSpecification ? { priceSpecification } : {}),
-        };
-      }),
-    },
-  };
-}
+  }));
 
-export function buildFaqSchema(variation: PageVariation) {
+  const contentFaqs = variation.faqs.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: item.answer,
+    },
+  }));
+
   return {
     "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: variation.faqs.map((item) => ({
-      "@type": "Question",
-      name: item.question,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: item.answer,
+    "@graph": [
+      {
+        "@type": "EmergencyService",
+        name: `${SITE_NAME} 24/7 Emergency ${shortName}`,
+        description: variation.metaDescription,
+        url: pageUrl,
+        telephone: phone.e164,
+        priceRange: priceRange(data.service),
+        areaServed: address,
+        address,
+        ...(geo ? { geo } : {}),
+        openingHoursSpecification: {
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+          ],
+          opens: "00:00",
+          closes: "23:59",
+        },
+        offers: {
+          "@type": "Offer",
+          url: pageUrl,
+          availability: "https://schema.org/InStock",
+          priceCurrency: "USD",
+          priceSpecification: toPriceSpecification(
+            data.service.avg_price_min,
+            data.service.avg_price_max,
+          ),
+        },
+        hasOfferCatalog: {
+          "@type": "OfferCatalog",
+          name: `${shortName} cost ranges in ${locationLabel(data.zip)}`,
+          itemListElement: variation.jobEstimates.map((job) => {
+            const priceSpecification = parseUsdRange(job.price);
+            return {
+              "@type": "Offer",
+              itemOffered: {
+                "@type": "Service",
+                name: job.job,
+              },
+              description: `${job.note}. Dispatch ${job.time}.`,
+              ...(priceSpecification ? { priceSpecification } : {}),
+            };
+          }),
+        },
       },
-    })),
+      {
+        "@type": "FAQPage",
+        mainEntity: [...pricingFaqs, ...contentFaqs],
+      },
+    ],
   };
 }

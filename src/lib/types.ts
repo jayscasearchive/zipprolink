@@ -20,6 +20,8 @@ export type ServiceCategory = {
   avg_response_time: string;
   is_active: boolean;
   created_at: string;
+  phone_en?: string | null;
+  phone_es?: string | null;
 };
 
 export type NeighborZip = Pick<

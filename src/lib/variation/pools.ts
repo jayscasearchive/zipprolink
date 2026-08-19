@@ -48,42 +48,42 @@ export const HERO_HOOKS: HookBuilder[] = [
   (ctx) => {
     const year = currentSeoYear();
     return {
-      headline: `${year} ${ctx.shortName} Cost & 24/7 Emergency Dispatch in ${ctx.city}, ${ctx.stateId} ${ctx.zip}`,
+      headline: `${year} Locksmith Cost & 24/7 Emergency Dispatch in ${ctx.city}, ${ctx.stateId} ${ctx.zip}`,
       support: `Typical ${ctx.city} jobs run ${ctx.priceRange}. A licensed ${ctx.serviceLabel} can be routed to ZIP ${ctx.zip} in about ${ctx.responseTime}. No-obligation estimate before any work.`,
     };
   },
   (ctx) => {
     const year = currentSeoYear();
     return {
-      headline: `${year} ${ctx.city} ${ctx.shortName} Prices & 24/7 Emergency Quotes — ZIP ${ctx.zip}`,
+      headline: `${year} Locksmith Cost & 24/7 Emergency Dispatch in ${ctx.city}, ${ctx.stateId} ${ctx.zip}`,
       support: `${ctx.densityLabel} coverage in ${ctx.county} County. Call ${HOTLINE_DISPLAY} for a live dispatch window of ${ctx.responseTime} and an upfront cost range.`,
     };
   },
   (ctx) => {
     const year = currentSeoYear();
     return {
-      headline: `${year} Emergency ${ctx.shortName} Cost in ${ctx.city}, ${ctx.stateId} ${ctx.zip} | 24/7 Dispatch`,
+      headline: `${year} Locksmith Cost & 24/7 Emergency Dispatch in ${ctx.city}, ${ctx.stateId} ${ctx.zip}`,
       support: `Compare lockout, rekey, and smart-lock cost ranges for ${ctx.place}. Nights, weekends, and holidays stay open. Typical jobs ${ctx.priceRange}.`,
     };
   },
   (ctx) => {
     const year = currentSeoYear();
     return {
-      headline: `${year} ${ctx.shortName} Cost Guide & Live Dispatch for ${ctx.city} ${ctx.zip}`,
+      headline: `${year} Locksmith Cost & 24/7 Emergency Dispatch in ${ctx.city}, ${ctx.stateId} ${ctx.zip}`,
       support: `Local routing across ${ctx.county} County. Average arrival ${ctx.responseTime}. You approve the on-site estimate before any drilling or rekey work.`,
     };
   },
   (ctx) => {
     const year = currentSeoYear();
     return {
-      headline: `${year} ${ctx.city}, ${ctx.stateId} ${ctx.zip} ${ctx.shortName} Cost & 24/7 Emergency Estimate`,
+      headline: `${year} Locksmith Cost & 24/7 Emergency Dispatch in ${ctx.city}, ${ctx.stateId} ${ctx.zip}`,
       support: `${ctx.populationLabel} This ${ctx.densityLabel.toLowerCase()} ZIP is staffed 24/7. Licensed techs only — TX DPS Private Security standards apply.`,
     };
   },
   (ctx) => {
     const year = currentSeoYear();
     return {
-      headline: `${year} ${ctx.shortName} Quotes & 24/7 Dispatch in ${ctx.city}, ${ctx.stateId} ${ctx.zip}`,
+      headline: `${year} Locksmith Cost & 24/7 Emergency Dispatch in ${ctx.city}, ${ctx.stateId} ${ctx.zip}`,
       support: `If you are locked out of a home, car, or office in ${ctx.place}, call ${HOTLINE_DISPLAY}. Typical response ${ctx.responseTime}; typical range ${ctx.priceRange}.`,
     };
   },
@@ -283,20 +283,29 @@ export function processCopy(ctx: CopyContext) {
   };
 }
 
+export function requiredFaqs(ctx: CopyContext): FaqItem[] {
+  return [
+    {
+      question: `How fast can a locksmith reach ${ctx.place} in an emergency?`,
+      answer: `Average dispatch for ${ctx.zip} is ${ctx.responseTime}. ${ctx.densityBand === "urban" ? "Downtown and mid-rise calls" : "Suburban driveway calls"} in ${ctx.city} are matched to techs already in ${ctx.county} County. Call ${HOTLINE_DISPLAY} with the exact building or cross-street.`,
+    },
+    {
+      question: `What payment methods do locksmiths in ${ctx.zip} accept?`,
+      answer: `Most ${ctx.city} technicians take major credit cards, debit, and digital wallets after you approve the on-site estimate. You are not charged to get the quote. Confirm the total before any lockout, rekey, or hardware work begins.`,
+    },
+    {
+      question: `Are locksmiths in ${ctx.city} required to hold a TX DPS PSB license?`,
+      answer: `Yes. Texas Occupations Code Chapter 1702 places locksmith companies under the Texas Department of Public Safety Private Security Bureau (TX DPS PSB). ZipProLink is a referral matching service — the arriving company holds the license. Ask to see it on site before authorizing work in ${ctx.zip}.`,
+    },
+  ];
+}
+
 export function faqPool(ctx: CopyContext): FaqItem[] {
   const label = ctx.serviceLabel;
   return [
     {
-      question: `How fast can a locksmith reach ${ctx.place}?`,
-      answer: `Average dispatch for ${ctx.zip} is ${ctx.responseTime}. ${ctx.densityBand === "urban" ? "Downtown and mid-rise calls" : "Suburban driveway calls"} in ${ctx.city} are matched to techs already in ${ctx.county} County. Call ${HOTLINE_DISPLAY} with the exact building or cross-street.`,
-    },
-    {
       question: `What does emergency ${label} service cost in ${ctx.zip}?`,
       answer: `Most ${ctx.city} emergency jobs land in ${ctx.priceRange}. High-security cylinders, commercial panic bars, or safe work are quoted after inspection. You get the number before drilling or rekeying starts.`,
-    },
-    {
-      question: `Are locksmiths in ${ctx.city} required to hold a TX DPS license?`,
-      answer: `Yes. Texas Occupations Code Chapter 1702 places locksmith companies under the Texas Department of Public Safety Private Security Program. ZipProLink routes ${ctx.zip} jobs to technicians who can legally operate in ${ctx.county} County — ask to see company licensing on site.`,
     },
     {
       question: `Can you open my car in ${ctx.zip} without damaging the door?`,

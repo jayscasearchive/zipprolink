@@ -1,7 +1,14 @@
 import { CallToAction } from "@/components/CallToAction";
 import { getDictionary, type AppLocale } from "@/lib/i18n";
+import type { ServiceCategory } from "@/lib/types";
 
-export function StickyCallBar({ locale }: { locale: AppLocale }) {
+export function StickyCallBar({
+  locale,
+  service,
+}: {
+  locale: AppLocale;
+  service?: ServiceCategory | null;
+}) {
   const copy = getDictionary(locale);
 
   return (
@@ -16,7 +23,7 @@ export function StickyCallBar({ locale }: { locale: AppLocale }) {
           </li>
         ))}
       </ul>
-      <CallToAction locale={locale} variant="sticky" />
+      <CallToAction locale={locale} variant="sticky" service={service} />
     </div>
   );
 }

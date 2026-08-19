@@ -131,7 +131,7 @@ export function DirectoryPage({ locale, data, variation }: DirectoryPageProps) {
             </p>
 
             <div className="mt-8 flex max-w-xl flex-col gap-3">
-              <CallToAction locale={locale} variant="hero" />
+              <CallToAction locale={locale} variant="hero" service={service} />
               <div className="flex flex-wrap gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-2 text-sm font-medium text-amber-200 ring-1 ring-white/10">
                   <Clock className="h-4 w-4" aria-hidden />

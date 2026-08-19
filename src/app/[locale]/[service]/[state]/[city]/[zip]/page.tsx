@@ -11,8 +11,7 @@ import {
 import { getDictionary, getLocalePhone, isAppLocale } from "@/lib/i18n";
 import { citySlug, directoryPath, parseStateId } from "@/lib/paths";
 import {
-  buildEmergencyServiceSchema,
-  buildFaqSchema,
+  buildPageJsonLd,
   serializeJsonLd,
 } from "@/lib/schema";
 import { currentPhaseService, isPhaseCoverage } from "@/lib/ssot";
@@ -43,7 +42,7 @@ export async function generateMetadata({
   }
 
   const data = await getDirectoryPageData(service, zip);
-  const phone = getLocalePhone(raw);
+  const phone = getLocalePhone(raw, data?.service);
   if (
     !data ||
     citySlug(data.zip.city) !== city ||
@@ -122,7 +121,7 @@ export default async function ServiceZipPage({ params }: ZipPageProps) {
     getPhaseServices(),
   ]);
   const copy = getDictionary(raw);
-  const phone = getLocalePhone(raw);
+  const phone = getLocalePhone(raw, data?.service);
 
   if (
     !data ||
@@ -168,10 +167,7 @@ export default async function ServiceZipPage({ params }: ZipPageProps) {
 
   return (
     <div className="flex min-h-full flex-1 flex-col bg-white">
-      <JsonLd
-        json={buildEmergencyServiceSchema(data, variation, pageUrl, raw)}
-      />
-      <JsonLd json={buildFaqSchema(variation)} />
+      <JsonLd json={buildPageJsonLd(data, variation, pageUrl, raw)} />
       <main>
         <DirectoryPage locale={raw} data={data} variation={variation} />
       </main>

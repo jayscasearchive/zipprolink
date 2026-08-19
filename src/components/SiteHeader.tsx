@@ -5,13 +5,19 @@ import { LocaleSwitch } from "@/components/LocaleSwitch";
 import { SITE_NAME } from "@/lib/constants";
 import { getDictionary, type AppLocale } from "@/lib/i18n";
 import { localeHomePath } from "@/lib/paths";
+import type { ServiceCategory } from "@/lib/types";
 
 type SiteHeaderProps = {
   locale: AppLocale;
   compact?: boolean;
+  service?: ServiceCategory | null;
 };
 
-export function SiteHeader({ locale, compact = false }: SiteHeaderProps) {
+export function SiteHeader({
+  locale,
+  compact = false,
+  service,
+}: SiteHeaderProps) {
   const copy = getDictionary(locale);
 
   return (
@@ -37,7 +43,7 @@ export function SiteHeader({ locale, compact = false }: SiteHeaderProps) {
             <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
             {copy.hotlineBadge}
           </span>
-          <CallToAction locale={locale} variant="header" />
+          <CallToAction locale={locale} variant="header" service={service} />
         </div>
       </div>
     </header>

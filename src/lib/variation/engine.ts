@@ -18,6 +18,7 @@ import {
   locksmithJobs,
   populationLabel,
   processCopy,
+  requiredFaqs,
   type CopyContext,
 } from "@/lib/variation/pools";
 import type { PageVariation } from "@/lib/variation/types";
@@ -69,8 +70,9 @@ export function buildPageVariation(
     LOCKSMITH_CHECKLISTS[0];
   const checklist = interpolateList(checklistSource, ctx);
 
-  const faqCount = 4 + pickIndex(hash, 2, 6);
-  const faqs = pickUnique(faqPool(ctx), hash ^ 0x9e3779b9, faqCount);
+  const extraCount = 1 + pickIndex(hash, 2, 6);
+  const extras = pickUnique(faqPool(ctx), hash ^ 0x9e3779b9, extraCount);
+  const faqs = [...requiredFaqs(ctx), ...extras];
 
   const urbanLift = ctx.densityBand === "urban" ? 1.08 : 1;
 
