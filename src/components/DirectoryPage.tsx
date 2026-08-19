@@ -1,23 +1,27 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { Clock, MapPin, Phone } from "lucide-react";
+import { Clock, MapPin } from "lucide-react";
+import { CallToAction } from "@/components/CallToAction";
 import { DispatchProcess } from "@/components/DispatchProcess";
 import { FaqAccordion } from "@/components/FaqAccordion";
 import { PriceTimeTable } from "@/components/PriceTimeTable";
 import { TexasDpsNotice } from "@/components/TexasDpsNotice";
 import { TrustBadges } from "@/components/TrustBadges";
-import { HOTLINE_DISPLAY, HOTLINE_TEL } from "@/lib/constants";
 import { priceRange } from "@/lib/content";
+import { getDictionary, type AppLocale } from "@/lib/i18n";
+import { directoryPath } from "@/lib/paths";
 import type { DirectoryPageData } from "@/lib/types";
 import type { PageVariation, SectionKey } from "@/lib/variation/types";
 
 type DirectoryPageProps = {
+  locale: AppLocale;
   data: DirectoryPageData;
   variation: PageVariation;
 };
 
-export function DirectoryPage({ data, variation }: DirectoryPageProps) {
+export function DirectoryPage({ locale, data, variation }: DirectoryPageProps) {
   const { service, zip, neighbors } = data;
+  const copy = getDictionary(locale);
 
   const sections: Record<SectionKey, ReactNode> = {
     process: (
@@ -60,7 +64,13 @@ export function DirectoryPage({ data, variation }: DirectoryPageProps) {
             {neighbors.map((neighbor) => (
               <Link
                 key={neighbor.zip_code}
-                href={`/${service.slug}/${neighbor.zip_code}`}
+                href={directoryPath({
+                  locale,
+                  service: service.slug,
+                  state: neighbor.state_id,
+                  city: neighbor.city,
+                  zip: neighbor.zip_code,
+                })}
                 className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition hover:border-emergency/40 hover:shadow-md"
               >
                 <p className="text-sm font-semibold text-navy">{neighbor.zip_code}</p>
@@ -88,10 +98,10 @@ export function DirectoryPage({ data, variation }: DirectoryPageProps) {
     faq: (
       <section key="faq">
         <h2 className="text-2xl font-semibold tracking-tight text-navy">
-          Frequently asked questions
+          {copy.faqHeading}
         </h2>
         <p className="mt-2 mb-6 text-sm text-slate-600">
-          Questions hashed to {zip.zip_code} — not a statewide FAQ clone.
+          {copy.faqLead(zip.zip_code)}
         </p>
         <FaqAccordion items={variation.faqs} />
       </section>
@@ -120,14 +130,8 @@ export function DirectoryPage({ data, variation }: DirectoryPageProps) {
               {variation.heroSupport}
             </p>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <a
-                href={HOTLINE_TEL}
-                className="inline-flex h-14 items-center justify-center gap-2 rounded-xl bg-emergency px-6 text-lg font-semibold shadow-lg shadow-emergency/30 transition hover:bg-emergency-dark"
-              >
-                <Phone className="h-5 w-5" aria-hidden />
-                Call Now · {HOTLINE_DISPLAY}
-              </a>
+            <div className="mt-8 flex max-w-xl flex-col gap-3">
+              <CallToAction locale={locale} variant="hero" />
               <div className="flex flex-wrap gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-2 text-sm font-medium text-amber-200 ring-1 ring-white/10">
                   <Clock className="h-4 w-4" aria-hidden />
@@ -193,17 +197,17 @@ export function DirectoryPage({ data, variation }: DirectoryPageProps) {
       {variation.sectionOrder
         .filter((key) => key !== "pricing")
         .map((key) => (
-        <div
-          key={key}
-          className={
-            key === "faq"
-              ? "mx-auto w-full max-w-6xl px-4 py-12 sm:px-6"
-              : "mx-auto w-full max-w-6xl px-4 py-8 sm:px-6"
-          }
-        >
-          {sections[key]}
-        </div>
-      ))}
+          <div
+            key={key}
+            className={
+              key === "faq"
+                ? "mx-auto w-full max-w-6xl px-4 py-12 sm:px-6"
+                : "mx-auto w-full max-w-6xl px-4 py-8 sm:px-6"
+            }
+          >
+            {sections[key]}
+          </div>
+        ))}
     </>
   );
 }

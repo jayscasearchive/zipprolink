@@ -103,3 +103,30 @@ export function buildPageVariation(
     metaDescription: buildMetaDescription(ctx),
   };
 }
+
+export function localizePageVariation(
+  variation: PageVariation,
+  locale: "en" | "es",
+  service: ServiceCategory,
+  zip: ZipCode,
+): PageVariation {
+  if (locale !== "es") {
+    return variation;
+  }
+
+  const ctx = buildCopyContext(service, zip);
+  const year = currentSeoYear();
+
+  return {
+    ...variation,
+    headline: `${year} Costo de cerrajero y despacho de emergencia 24/7 en ${ctx.city}, ${ctx.stateId} ${ctx.zip}`,
+    heroSupport: `Trabajos típicos en ${ctx.city}: ${ctx.priceRange}. Un cerrajero con licencia puede ser enviado al ZIP ${ctx.zip} en unos ${ctx.responseTime}. Estimado sin obligación.`,
+    pricingHeading: `${year} Costos y tiempos de despacho de cerrajero en ${ctx.city}`,
+    pricingIntro: `Rangos de emergencia y ventanas de llegada para el ZIP ${ctx.zip} en ${ctx.city}.`,
+    metaDescription:
+      `${year} costo de cerrajero en ${ctx.city}, ${ctx.stateId} ${ctx.zip}. Rango ${ctx.priceRange}. Despacho 24/7 en ${ctx.responseTime}.`.slice(
+        0,
+        160,
+      ),
+  };
+}

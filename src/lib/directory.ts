@@ -1,5 +1,7 @@
 import { cache } from "react";
-import { currentPhaseService } from "@/lib/ssot";
+import { LOCALES, type AppLocale } from "@/lib/i18n";
+import { citySlug, parseStateId } from "@/lib/paths";
+import { currentPhaseService, isPhaseCoverage } from "@/lib/ssot";
 import { supabase } from "@/lib/supabase";
 import type {
   DirectoryPageData,
@@ -7,6 +9,26 @@ import type {
   ServiceCategory,
   ZipCode,
 } from "@/lib/types";
+
+export type CoverageZip = Pick<
+  ZipCode,
+  "zip_code" | "city" | "state_id" | "state_name"
+>;
+
+export type ZipStaticParam = {
+  locale: AppLocale;
+  service: string;
+  state: string;
+  city: string;
+  zip: string;
+};
+
+export type CityStaticParam = {
+  locale: AppLocale;
+  service: string;
+  state: string;
+  city: string;
+};
 
 export async function getServiceBySlug(
   slug: string,
@@ -86,6 +108,118 @@ export async function getNeighboringZips(
   return [...neighbors, ...(sameState ?? [])];
 }
 
+export async function getPhaseCoverageZips(): Promise<CoverageZip[]> {
+  const service = currentPhaseService();
+  const { data: zips, error } = await supabase
+    .from("zip_codes")
+    .select("zip_code, city, state_id, state_name")
+    .order("zip_code", { ascending: true });
+
+  if (error) {
+    console.error("phase coverage zip lookup failed", error.message);
+    return [];
+  }
+
+  return (zips ?? []).filter((zip) =>
+    isPhaseCoverage(service.slug, zip.state_id),
+  );
+}
+
+export async function getZipStaticParams(): Promise<ZipStaticParam[]> {
+  const service = currentPhaseService();
+  const zips = await getPhaseCoverageZips();
+
+  return LOCALES.flatMap((locale) =>
+    zips.map((zip) => ({
+      locale,
+      service: service.slug,
+      state: zip.state_id.toLowerCase(),
+      city: citySlug(zip.city),
+      zip: zip.zip_code,
+    })),
+  );
+}
+
+export async function getCityStaticParams(): Promise<CityStaticParam[]> {
+  const service = currentPhaseService();
+  const zips = await getPhaseCoverageZips();
+  const seen = new Set<string>();
+  const hubs: CityStaticParam[] = [];
+
+  for (const locale of LOCALES) {
+    for (const zip of zips) {
+      const state = zip.state_id.toLowerCase();
+      const city = citySlug(zip.city);
+      const key = `${locale}:${service.slug}:${state}:${city}`;
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+      hubs.push({
+        locale,
+        service: service.slug,
+        state,
+        city,
+      });
+    }
+  }
+
+  return hubs;
+}
+
+export async function getCityHubData(
+  serviceSlug: string,
+  stateSlugValue: string,
+  citySlugValue: string,
+) {
+  const service = await getServiceBySlug(serviceSlug);
+  const stateId = parseStateId(stateSlugValue);
+
+  if (!service || !isPhaseCoverage(service.slug, stateId)) {
+    return null;
+  }
+
+  const zips = await getPhaseCoverageZips();
+  const cityZips = zips.filter(
+    (zip) =>
+      zip.state_id.toUpperCase() === stateId &&
+      citySlug(zip.city) === citySlugValue,
+  );
+
+  if (!cityZips.length) {
+    return null;
+  }
+
+  const sample = cityZips[0];
+  if (!sample) {
+    return null;
+  }
+  return {
+    service,
+    stateId,
+    stateName: sample.state_name,
+    cityName: sample.city,
+    citySlug: citySlug(sample.city),
+    zips: cityZips,
+  };
+}
+
+export async function resolveCoverageLocation(
+  serviceSlug: string,
+  zipCode: string,
+) {
+  const [service, zip] = await Promise.all([
+    getServiceBySlug(serviceSlug),
+    getZipCode(zipCode),
+  ]);
+
+  if (!service || !zip || !isPhaseCoverage(service.slug, zip.state_id)) {
+    return null;
+  }
+
+  return { service, zip };
+}
+
 export const getDirectoryPageData = cache(async function getDirectoryPageData(
   serviceSlug: string,
   zipCode: string,
@@ -95,7 +229,7 @@ export const getDirectoryPageData = cache(async function getDirectoryPageData(
     getZipCode(zipCode),
   ]);
 
-  if (!service || !zip) {
+  if (!service || !zip || !isPhaseCoverage(service.slug, zip.state_id)) {
     return null;
   }
 

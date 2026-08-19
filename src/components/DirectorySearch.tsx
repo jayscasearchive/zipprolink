@@ -3,37 +3,72 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
+import { getDictionary, type AppLocale } from "@/lib/i18n";
+import { directoryPath } from "@/lib/paths";
 import { currentPhaseService } from "@/lib/ssot";
 
 type DirectorySearchProps = {
+  locale: AppLocale;
   services: { slug: string; name: string }[];
   defaultService?: string;
   variant?: "hero" | "compact";
 };
 
 export function DirectorySearch({
+  locale,
   services,
   defaultService,
   variant = "hero",
 }: DirectorySearchProps) {
   const router = useRouter();
+  const copy = getDictionary(locale);
   const [service, setService] = useState(
     defaultService ?? services[0]?.slug ?? currentPhaseService().slug,
   );
   const [zip, setZip] = useState("");
   const [error, setError] = useState("");
+  const [pending, setPending] = useState(false);
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const normalized = zip.trim();
 
     if (!/^\d{5}$/.test(normalized)) {
-      setError("Enter a valid 5-digit US ZIP code.");
+      setError(copy.searchError);
       return;
     }
 
     setError("");
-    router.push(`/${service}/${normalized}`);
+    setPending(true);
+
+    try {
+      const response = await fetch(
+        `/api/directory/lookup?zip=${normalized}&service=${encodeURIComponent(service)}`,
+      );
+      if (!response.ok) {
+        setError(copy.searchError);
+        return;
+      }
+      const data = (await response.json()) as {
+        service: string;
+        state: string;
+        city: string;
+        zip: string;
+      };
+      router.push(
+        directoryPath({
+          locale,
+          service: data.service,
+          state: data.state,
+          city: data.city,
+          zip: data.zip,
+        }),
+      );
+    } catch {
+      setError(copy.searchError);
+    } finally {
+      setPending(false);
+    }
   }
 
   const isHero = variant === "hero";
@@ -78,7 +113,7 @@ export function DirectorySearch({
           inputMode="numeric"
           autoComplete="postal-code"
           maxLength={5}
-          placeholder="Enter Texas ZIP (e.g. 77002)"
+          placeholder={copy.searchPlaceholder}
           value={zip}
           onChange={(event) => {
             setZip(event.target.value.replace(/\D/g, "").slice(0, 5));
@@ -89,10 +124,11 @@ export function DirectorySearch({
 
         <button
           type="submit"
-          className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-emergency px-5 text-sm font-semibold text-white transition hover:bg-emergency-dark"
+          disabled={pending}
+          className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-emergency px-5 text-sm font-semibold text-white transition hover:bg-emergency-dark disabled:opacity-70"
         >
           <Search className="h-4 w-4" aria-hidden />
-          Find Help
+          {copy.searchButton}
         </button>
       </div>
       {error ? (

@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { SiteFooter } from "@/components/SiteFooter";
-import { StickyCallBar } from "@/components/StickyCallBar";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { currentSeoYear } from "@/lib/content";
 import "./globals.css";
@@ -24,8 +22,7 @@ export const metadata: Metadata = {
     default: `${seoYear} Locksmith Cost & 24/7 Emergency Dispatch in Texas`,
     template: `%s | ${SITE_NAME}`,
   },
-  description:
-    `Compare ${seoYear} Texas locksmith cost ranges and get 24/7 emergency dispatch by ZIP. Licensed techs in Houston, Austin, Dallas, and San Antonio. No-obligation estimates.`,
+  description: `Compare ${seoYear} Texas locksmith cost ranges and get 24/7 emergency dispatch by ZIP. Licensed techs in Houston, Austin, Dallas, and San Antonio. No-obligation estimates.`,
   keywords: [
     "locksmith cost Texas",
     "emergency locksmith quote",
@@ -42,9 +39,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-white text-slate-900">
-        <div className="flex min-h-full flex-1 flex-col">{children}</div>
-        <SiteFooter />
-        <StickyCallBar />
+        {children}
       </body>
     </html>
   );

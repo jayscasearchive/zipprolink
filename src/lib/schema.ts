@@ -1,5 +1,6 @@
-import { HOTLINE_E164, SITE_NAME } from "@/lib/constants";
+import { SITE_NAME } from "@/lib/constants";
 import { locationLabel, priceRange, shortServiceName } from "@/lib/content";
+import { getLocalePhone, type AppLocale } from "@/lib/i18n";
 import type { DirectoryPageData, ZipCode } from "@/lib/types";
 import type { PageVariation } from "@/lib/variation/types";
 
@@ -61,9 +62,11 @@ export function buildEmergencyServiceSchema(
   data: DirectoryPageData,
   variation: PageVariation,
   pageUrl: string,
+  locale: AppLocale = "en",
 ) {
   const shortName = shortServiceName(data.service);
   const geo = toGeoCoordinates(data.zip);
+  const phone = getLocalePhone(locale);
   const address = {
     "@type": "PostalAddress" as const,
     addressLocality: data.zip.city,
@@ -78,7 +81,7 @@ export function buildEmergencyServiceSchema(
     name: `${SITE_NAME} 24/7 Emergency ${shortName}`,
     description: variation.metaDescription,
     url: pageUrl,
-    telephone: HOTLINE_E164,
+    telephone: phone.e164,
     priceRange: priceRange(data.service),
     areaServed: address,
     address,

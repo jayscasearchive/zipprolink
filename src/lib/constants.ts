@@ -1,14 +1,13 @@
 import { currentPhaseService } from "@/lib/ssot";
+import { PHONE_DID } from "@/lib/i18n";
 
 export const SITE_NAME = "ZipProLink";
 export const SITE_TAGLINE = "24/7 Emergency Locksmith Cost & Dispatch · Texas";
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://zipprolink.com";
 
-/** Formatted number shown in the UI. */
-export const HOTLINE_DISPLAY = "1-800-000-0000";
-/** E.164 dial string for `href="tel:+1..."`. */
-export const HOTLINE_E164 = "+18000000000";
+export const HOTLINE_DISPLAY = PHONE_DID.en.display;
+export const HOTLINE_E164 = PHONE_DID.en.e164;
 export const HOTLINE_TEL = `tel:${HOTLINE_E164}`;
 
 export const REFERRAL_DISCLAIMER =

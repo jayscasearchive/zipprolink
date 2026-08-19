@@ -1,41 +1,40 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/constants";
-import { isPhaseCoverage } from "@/lib/ssot";
-import { supabase } from "@/lib/supabase";
+import { getCityStaticParams, getZipStaticParams } from "@/lib/directory";
+import { LOCALES } from "@/lib/i18n";
+import { directoryPath, localeHomePath } from "@/lib/paths";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [{ data: services }, { data: zips }] = await Promise.all([
-    supabase
-      .from("service_categories")
-      .select("slug, is_active")
-      .eq("is_active", true),
-    supabase.from("zip_codes").select("zip_code, state_id"),
+  const [zips, hubs] = await Promise.all([
+    getZipStaticParams(),
+    getCityStaticParams(),
   ]);
 
-  const entries: MetadataRoute.Sitemap = [
-    {
-      url: SITE_URL,
+  const entries: MetadataRoute.Sitemap = LOCALES.map((locale) => ({
+    url: `${SITE_URL}${localeHomePath(locale)}`,
+    lastModified: new Date(),
+    changeFrequency: "daily",
+    priority: 1,
+  }));
+
+  for (const hub of hubs) {
+    entries.push({
+      url: `${SITE_URL}${directoryPath(hub)}`,
       lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 1,
-    },
-  ];
+      changeFrequency: "weekly",
+      priority: 0.7,
+    });
+  }
 
-  for (const service of services ?? []) {
-    for (const zip of zips ?? []) {
-      if (!isPhaseCoverage(service.slug, zip.state_id)) {
-        continue;
-      }
-
-      entries.push({
-        url: `${SITE_URL}/${service.slug}/${zip.zip_code}`,
-        lastModified: new Date(),
-        changeFrequency: "weekly",
-        priority: 0.8,
-      });
-    }
+  for (const zip of zips) {
+    entries.push({
+      url: `${SITE_URL}${directoryPath(zip)}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    });
   }
 
   return entries;
