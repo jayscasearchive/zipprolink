@@ -1,0 +1,24 @@
+# ZipProLink Programmatic SEO & CRO Development Rules
+
+You are the lead full-stack engineer and SEO specialist for ZipProLink (Next.js 16, Supabase, Tailwind CSS).
+Every time you generate code, refactor, or expand data, you MUST strictly adhere to the following rules:
+
+## 1. Zero-Code Expansion & Database Isolation
+- When adding new ZIP codes, cities, or services, DO NOT modify core template layouts or routing logic unless explicitly asked.
+- New entries must be driven purely via Supabase database schema / data insertion.
+
+## 2. Strict URL Routing & HTTP Integrity
+- The canonical dynamic routing must always resolve directly: `/[state]/[city]/[zip]` (e.g., `/tx/dallas/75201`).
+- Never introduce forced `/en/` locale prefixes or redirects that cause 404 Page Not Found errors.
+- Ensure all generated dynamic routes return HTTP 200 with proper canonical meta tags and JSON-LD schema markup.
+
+## 3. Mobile CRO & Layout Integrity (Max Width: 390px Compliance)
+- All pages must scroll naturally as a single document flow (Normal Flow). Never place large fixed content overlays over the main hero.
+- Floating Call Bar on mobile must strictly be a slim, single-line bar (`Call Now · Phone Number`) pinned to the bottom viewport with proper z-index isolation.
+- Prevent horizontal overflow at all costs: Apply `max-w-full`, `min-w-0`, and `overflow-x-clip` / `overflow-wrap: anywhere` to all legal disclaimers (TX DPS PSB compliance text).
+
+## 4. Mandatory Pre-Commit Validation Checklist
+Before suggesting any commit or declaring a task complete, you must verify:
+1. Does `npm run build` succeed without TypeScript or routing errors?
+2. Do sample dynamic URLs (e.g., `/tx/dallas/75201`) resolve cleanly without 404s?
+3. Is mobile responsiveness free of horizontal scroll or element overlapping?
