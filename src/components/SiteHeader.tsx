@@ -21,9 +21,9 @@ export function SiteHeader({
   const copy = getDictionary(locale);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-navy/95 text-white backdrop-blur">
+    <header className="sticky top-0 z-40 max-w-full overflow-x-hidden border-b border-white/10 bg-navy/95 text-white backdrop-blur">
       <div
-        className={`mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 ${compact ? "h-16" : "h-[4.5rem]"} sm:px-6`}
+        className={`mx-auto flex w-full min-w-0 max-w-6xl items-center justify-between gap-3 px-4 ${compact ? "h-16" : "h-16 sm:h-[4.5rem]"} sm:px-6`}
       >
         <Link href={localeHomePath(locale)} className="flex items-center gap-2.5">
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emergency shadow-sm">
@@ -37,7 +37,7 @@ export function SiteHeader({
           </span>
         </Link>
 
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <LocaleSwitch locale={locale} />
           <span className="hidden items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300 lg:inline-flex">
             <ShieldCheck className="h-3.5 w-3.5" aria-hidden />

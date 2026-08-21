@@ -59,9 +59,9 @@ export default async function LocaleHomePage({ params }: HomeProps) {
 
   return (
     <main>
-      <section className="relative overflow-hidden bg-navy text-white">
+      <section className="relative overflow-x-hidden bg-navy text-white">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(225,29,72,0.25),transparent_40%),radial-gradient(circle_at_90%_10%,rgba(245,158,11,0.16),transparent_32%)]" />
-        <div className="relative mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
+        <div className="relative mx-auto w-full min-w-0 max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
           <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-amber-200">
             <Zap className="h-3.5 w-3.5" aria-hidden />
             {copy.homeTagline}
@@ -82,7 +82,7 @@ export default async function LocaleHomePage({ params }: HomeProps) {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6">
+      <section className="mx-auto w-full min-w-0 max-w-6xl px-4 py-14 sm:px-6">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight text-navy">
             {copy.coverageHeading}

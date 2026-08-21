@@ -110,9 +110,9 @@ export function DirectoryPage({ locale, data, variation }: DirectoryPageProps) {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-navy text-white">
+      <section className="relative overflow-x-hidden bg-navy text-white">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(225,29,72,0.28),transparent_42%)]" />
-        <div className="relative mx-auto grid w-full max-w-6xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:py-16">
+        <div className="relative mx-auto grid w-full min-w-0 max-w-6xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:py-16">
           <div>
             <div className="mb-4 flex flex-wrap gap-2">
               <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-200">
@@ -123,14 +123,14 @@ export function DirectoryPage({ locale, data, variation }: DirectoryPageProps) {
                 {variation.densityLabel}
               </p>
             </div>
-            <h1 className="max-w-3xl text-3xl font-semibold tracking-tight sm:text-5xl sm:leading-[1.1]">
+            <h1 className="max-w-3xl text-3xl font-semibold tracking-tight wrap-break-word sm:text-5xl sm:leading-[1.1]">
               {variation.headline}
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-7 text-white/75 sm:text-lg">
               {variation.heroSupport}
             </p>
 
-            <div className="mt-8 flex max-w-xl flex-col gap-3">
+            <div className="mt-8 flex w-full min-w-0 max-w-xl flex-col gap-3">
               <CallToAction locale={locale} variant="hero" service={service} />
               <div className="flex flex-wrap gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-2 text-sm font-medium text-amber-200 ring-1 ring-white/10">
@@ -177,12 +177,12 @@ export function DirectoryPage({ locale, data, variation }: DirectoryPageProps) {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
+      <section className="mx-auto w-full min-w-0 max-w-6xl px-4 py-10 sm:px-6">
         <TrustBadges />
       </section>
 
       <section className="bg-slate-50">
-        <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
+        <div className="mx-auto w-full min-w-0 max-w-6xl px-4 py-12 sm:px-6">
           <h2 className="text-2xl font-semibold tracking-tight text-navy">
             {variation.introHeading}
           </h2>
@@ -201,8 +201,8 @@ export function DirectoryPage({ locale, data, variation }: DirectoryPageProps) {
             key={key}
             className={
               key === "faq"
-                ? "mx-auto w-full max-w-6xl px-4 py-12 sm:px-6"
-                : "mx-auto w-full max-w-6xl px-4 py-8 sm:px-6"
+                ? "mx-auto w-full min-w-0 max-w-6xl px-4 py-12 sm:px-6"
+                : "mx-auto w-full min-w-0 max-w-6xl px-4 py-8 sm:px-6"
             }
           >
             {sections[key]}

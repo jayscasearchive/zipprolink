@@ -32,10 +32,10 @@ export default async function LocaleLayout({
   const service = await getServiceBySlug(currentPhaseService().slug);
 
   return (
-    <div className="flex min-h-full flex-1 flex-col">
+    <div className="flex min-h-dvh max-w-full flex-col">
       <HtmlLang locale={locale} />
       <SiteHeader locale={locale} service={service} />
-      <div className="flex min-h-full flex-1 flex-col">{children}</div>
+      <div className="min-w-0 max-w-full flex-1 overflow-x-hidden">{children}</div>
       <SiteFooter locale={locale} service={service} />
       <StickyCallBar locale={locale} service={service} />
     </div>

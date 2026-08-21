@@ -9,7 +9,7 @@ export default function NotFound() {
   const copy = getDictionary(DEFAULT_LOCALE);
 
   return (
-    <div className="flex min-h-full flex-1 flex-col bg-slate-50">
+    <div className="flex min-h-dvh max-w-full flex-col overflow-x-hidden bg-slate-50">
       <SiteHeader locale={DEFAULT_LOCALE} />
       <main className="mx-auto w-full max-w-xl flex-1 px-4 py-20 text-center">
         <p className="text-sm font-semibold uppercase tracking-[0.16em] text-emergency">

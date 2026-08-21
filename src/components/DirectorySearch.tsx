@@ -78,8 +78,8 @@ export function DirectorySearch({
       onSubmit={onSubmit}
       className={
         isHero
-          ? "w-full rounded-2xl bg-white p-3 shadow-xl shadow-navy/15 ring-1 ring-black/5 sm:p-4"
-          : "w-full rounded-xl border border-slate-200 bg-white p-3"
+          ? "w-full min-w-0 max-w-full overflow-x-hidden rounded-2xl bg-white p-3 shadow-xl shadow-navy/15 ring-1 ring-black/5 sm:p-4"
+          : "w-full min-w-0 max-w-full overflow-x-hidden rounded-xl border border-slate-200 bg-white p-3"
       }
     >
       <div className="flex flex-col gap-2 sm:flex-row">

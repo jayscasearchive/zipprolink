@@ -20,14 +20,22 @@ export function ReferralDisclaimer({
         : "text-slate-500";
 
   return (
-    <div className={toneClass}>
-      <p className={compact ? "text-[10px] leading-4" : "text-[11px] leading-5 sm:text-xs sm:leading-6"}>
+    <div className={`min-w-0 max-w-full overflow-x-hidden ${toneClass}`}>
+      <p
+        className={
+          compact
+            ? "text-[10px] leading-4 wrap-break-word [overflow-wrap:anywhere]"
+            : "text-[11px] leading-5 wrap-break-word [overflow-wrap:anywhere] sm:text-xs sm:leading-6"
+        }
+      >
         {copy.referralDisclaimer}
       </p>
       {!compact ? (
-        <p className="mt-2 text-[11px] leading-5 sm:text-xs">{copy.tcpaDisclaimer}</p>
+        <p className="mt-2 text-[11px] leading-5 wrap-break-word [overflow-wrap:anywhere] sm:text-xs">
+          {copy.tcpaDisclaimer}
+        </p>
       ) : (
-        <p className="mt-1 text-[10px] leading-4">
+        <p className="mt-1 text-[10px] leading-4 wrap-break-word [overflow-wrap:anywhere]">
           {copy.dpsShort} {copy.tcpaDisclaimer}
         </p>
       )}

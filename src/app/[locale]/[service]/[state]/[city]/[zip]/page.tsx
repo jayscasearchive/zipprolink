@@ -173,7 +173,7 @@ export default async function ServiceZipPage({ params }: ZipPageProps) {
   })}`;
 
   return (
-    <div className="flex min-h-full flex-1 flex-col bg-white">
+    <div className="min-w-0 max-w-full bg-white">
       <JsonLd json={buildPageJsonLd(data, variation, pageUrl, raw)} />
       <main>
         <DirectoryPage locale={raw} data={data} variation={variation} />

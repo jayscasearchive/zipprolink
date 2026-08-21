@@ -14,7 +14,7 @@ export function SiteFooter({
 
   return (
     <footer className="mt-auto border-t border-slate-200 bg-navy text-white">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 pb-24 pt-8 md:pb-10 sm:px-6">
+      <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-col gap-5 px-4 pb-20 pt-8 sm:px-6 md:pb-10">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <p className="text-sm text-white/70">{copy.footerBrand}</p>
           <CallToAction locale={locale} variant="footer" service={service} />

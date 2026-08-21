@@ -24,27 +24,26 @@ export function CallToAction({
   const isSticky = variant === "sticky";
   const isFooter = variant === "footer";
   const isHero = variant === "hero";
+  const showLegal = isHero;
 
   const buttonClass = isHeader
-    ? "inline-flex items-center gap-2 rounded-full bg-emergency px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emergency-dark"
+    ? "inline-flex shrink-0 items-center gap-2 rounded-full bg-emergency px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emergency-dark"
     : isSticky
-      ? "flex w-full items-center justify-center gap-2 rounded-xl bg-emergency px-4 py-3.5 text-base font-semibold text-white shadow-sm"
+      ? "flex h-11 w-full max-w-full items-center justify-center gap-2 rounded-lg bg-emergency px-3 text-sm font-semibold text-white"
       : isFooter
         ? "inline-flex items-center gap-2 text-sm font-semibold"
-        : "inline-flex h-14 items-center justify-center gap-2 rounded-xl bg-emergency px-6 text-lg font-semibold shadow-lg shadow-emergency/30 transition hover:bg-emergency-dark";
+        : "inline-flex h-14 w-full max-w-full items-center justify-center gap-2 rounded-xl bg-emergency px-6 text-lg font-semibold shadow-lg shadow-emergency/30 transition hover:bg-emergency-dark";
 
   return (
-    <div className={isSticky || isHero ? "flex w-full flex-col" : "flex flex-col"}>
-      {!isFooter ? (
-        <p
-          className={
-            isHeader
-              ? "mb-1 max-w-[14rem] text-[10px] leading-3 text-white/70 sm:max-w-none"
-              : isSticky
-                ? "mb-1.5 text-center text-[11px] font-medium text-navy"
-                : "mb-2 text-sm font-medium text-amber-200"
-          }
-        >
+    <div
+      className={
+        isSticky || isHero
+          ? "flex w-full min-w-0 max-w-full flex-col"
+          : "flex min-w-0 max-w-full flex-col"
+      }
+    >
+      {isHero ? (
+        <p className="mb-2 max-w-full text-sm font-medium break-words text-amber-200">
           {copy.ivr}
         </p>
       ) : null}
@@ -53,7 +52,7 @@ export function CallToAction({
         aria-label={`${copy.callNow} ${phone.display}`}
         className={buttonClass}
       >
-        <Phone className={isHeader || isFooter ? "h-4 w-4" : "h-5 w-5"} aria-hidden />
+        <Phone className={isHeader || isFooter || isSticky ? "h-4 w-4 shrink-0" : "h-5 w-5 shrink-0"} aria-hidden />
         {isHeader ? (
           <>
             <span className="hidden sm:inline">{phone.display}</span>
@@ -61,19 +60,21 @@ export function CallToAction({
           </>
         ) : isFooter ? (
           phone.display
+        ) : isSticky ? (
+          <span className="truncate">
+            {copy.callNow} · {phone.display}
+          </span>
         ) : (
           <>
             {copy.callNow} · {phone.display}
           </>
         )}
       </a>
-      <div className={isSticky || isHeader ? "mt-1.5" : "mt-2"}>
-          <ReferralDisclaimer
-            locale={locale}
-            compact
-            tone={isFooter || isHero || isHeader ? "muted" : "light"}
-          />
+      {showLegal ? (
+        <div className="mt-2 min-w-0 max-w-full">
+          <ReferralDisclaimer locale={locale} compact tone="muted" />
         </div>
+      ) : null}
     </div>
   );
 }

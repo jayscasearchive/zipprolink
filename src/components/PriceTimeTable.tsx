@@ -40,8 +40,8 @@ export function PriceTimeTable({
       <div
         className={
           isHero
-            ? "overflow-x-auto rounded-2xl border border-white/15 bg-white shadow-lg"
-            : "overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm"
+            ? "max-w-full overflow-x-auto rounded-2xl border border-white/15 bg-white shadow-lg"
+            : "max-w-full overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm"
         }
       >
         <table className="min-w-full text-left text-sm">

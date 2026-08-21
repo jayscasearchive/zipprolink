@@ -129,7 +129,7 @@ export default async function CityHubPage({ params }: CityHubProps) {
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumb) }}
       />
       <section className="bg-navy text-white">
-        <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
+        <div className="mx-auto w-full min-w-0 max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
           <nav className="text-xs font-medium text-white/60">
             <Link href={localeHomePath(raw)} className="hover:text-white">
               {copy.breadcrumbHome}
@@ -148,7 +148,7 @@ export default async function CityHubPage({ params }: CityHubProps) {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
+      <section className="mx-auto w-full min-w-0 max-w-6xl px-4 py-12 sm:px-6">
         <h2 className="text-2xl font-semibold tracking-tight text-navy">
           {copy.zipListHeading}
         </h2>
