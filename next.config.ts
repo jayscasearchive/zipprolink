@@ -1,15 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  async redirects() {
-    return [
-      {
-        source: "/",
-        destination: "/en",
-        permanent: true,
-      },
-    ];
-  },
+  // Default locale is unprefixed (`localePrefix: 'as-needed'`).
+  // `/` and `/tx/...` are rewritten to `/en/...` in `src/proxy.ts`.
 };
 
 export default nextConfig;

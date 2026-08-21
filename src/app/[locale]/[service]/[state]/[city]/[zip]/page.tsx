@@ -89,6 +89,13 @@ export async function generateMetadata({
           city: data.zip.city,
           zip: data.zip.zip_code,
         }),
+        "x-default": directoryPath({
+          locale: "en",
+          service: data.service.slug,
+          state: data.zip.state_id,
+          city: data.zip.city,
+          zip: data.zip.zip_code,
+        }),
       },
     },
     openGraph: {

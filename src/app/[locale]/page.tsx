@@ -33,6 +33,7 @@ export async function generateMetadata({ params }: HomeProps): Promise<Metadata>
       languages: {
         en: localeHomePath("en"),
         es: localeHomePath("es"),
+        "x-default": localeHomePath("en"),
       },
     },
     openGraph: {

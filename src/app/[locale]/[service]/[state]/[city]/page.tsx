@@ -65,6 +65,12 @@ export async function generateMetadata({
           state: hub.stateId,
           city: hub.cityName,
         }),
+        "x-default": directoryPath({
+          locale: "en",
+          service: hub.service.slug,
+          state: hub.stateId,
+          city: hub.cityName,
+        }),
       },
     },
     openGraph: {
