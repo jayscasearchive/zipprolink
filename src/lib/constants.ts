@@ -16,6 +16,9 @@ export const REFERRAL_DISCLAIMER =
 export const TCPA_DISCLAIMER =
   "Calls may be recorded for quality and training purposes.";
 
+export const AFFILIATE_AVAILABILITY_DISCLAIMER =
+  "Same-day and 24/7 emergency services are subject to provider participation, location, technician availability, and demand. Availability is not guaranteed and may vary by market and appointment capacity.";
+
 export const STICKY_TRUST_BADGES = [
   "24/7 Live Dispatch",
   "No Obligation Estimate",
