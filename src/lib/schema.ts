@@ -101,7 +101,7 @@ export function buildPageJsonLd(
         name: `${SITE_NAME} 24/7 Emergency ${shortName}`,
         description: variation.metaDescription,
         url: pageUrl,
-        telephone: phone.e164,
+        telephone: phone.schemaTelephone,
         priceRange: priceRange(data.service),
         areaServed: address,
         address,

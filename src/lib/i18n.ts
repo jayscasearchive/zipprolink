@@ -13,25 +13,61 @@ export function parseLocale(value: string | undefined): AppLocale {
   return isAppLocale(value) ? value : DEFAULT_LOCALE;
 }
 
-export const PHONE_DID = {
-  en: {
-    display: process.env.NEXT_PUBLIC_PHONE_EN_DISPLAY ?? "1-800-000-0000",
-    e164: process.env.NEXT_PUBLIC_PHONE_EN ?? "+18000000000",
-  },
-  es: {
-    display: process.env.NEXT_PUBLIC_PHONE_ES_DISPLAY ?? "1-888-000-0000",
-    e164: process.env.NEXT_PUBLIC_PHONE_ES ?? "+18880000000",
-  },
+export const TRACKING_PHONE = {
+  display: "(833) 567-5849",
+  e164: "+18335675849",
+  tel: "tel:+18335675849",
+  schema: "+1-833-567-5849",
 } as const;
+
+function isPlaceholderPhone(value: string | null | undefined) {
+  if (!value?.trim()) {
+    return true;
+  }
+  const digits = value.replace(/\D/g, "");
+  return (
+    digits.length < 10 ||
+    digits === "18000000000" ||
+    digits === "18880000000" ||
+    digits === "8000000000" ||
+    digits === "8880000000" ||
+    /^1?0+$/.test(digits)
+  );
+}
+
+function envPhone(displayEnv: string | undefined, e164Env: string | undefined) {
+  return {
+    display:
+      displayEnv && !isPlaceholderPhone(displayEnv)
+        ? displayEnv.trim()
+        : TRACKING_PHONE.display,
+    e164:
+      e164Env && !isPlaceholderPhone(e164Env)
+        ? e164Env.trim()
+        : TRACKING_PHONE.e164,
+  };
+}
+
+export const PHONE_DID = {
+  en: envPhone(
+    process.env.NEXT_PUBLIC_PHONE_EN_DISPLAY,
+    process.env.NEXT_PUBLIC_PHONE_EN,
+  ),
+  es: envPhone(
+    process.env.NEXT_PUBLIC_PHONE_ES_DISPLAY,
+    process.env.NEXT_PUBLIC_PHONE_ES,
+  ),
+};
 
 export type LocalePhone = {
   display: string;
   e164: string;
   tel: string;
+  schemaTelephone: string;
 };
 
 function normalizeE164(value: string | null | undefined, fallback: string) {
-  if (!value?.trim()) {
+  if (isPlaceholderPhone(value) || !value) {
     return fallback;
   }
   const digits = value.replace(/\D/g, "");
@@ -50,7 +86,15 @@ function normalizeE164(value: string | null | undefined, fallback: string) {
 function formatDidDisplay(e164: string, fallback: string) {
   const digits = e164.replace(/\D/g, "");
   if (digits.length === 11 && digits.startsWith("1")) {
-    return `${digits.slice(0, 1)}-${digits.slice(1, 4)}-${digits.slice(4, 7)}-${digits.slice(7)}`;
+    return `(${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
+  }
+  return fallback;
+}
+
+function formatSchemaTelephone(e164: string, fallback: string) {
+  const digits = e164.replace(/\D/g, "");
+  if (digits.length === 11 && digits.startsWith("1")) {
+    return `+1-${digits.slice(1, 4)}-${digits.slice(4, 7)}-${digits.slice(7)}`;
   }
   return fallback;
 }
@@ -61,11 +105,15 @@ export function getLocalePhone(
 ): LocalePhone {
   const fallback = locale === "es" ? PHONE_DID.es : PHONE_DID.en;
   const raw = locale === "es" ? service?.phone_es : service?.phone_en;
-  const e164 = normalizeE164(raw, fallback.e164);
+  const e164 = normalizeE164(
+    raw,
+    normalizeE164(fallback.e164, TRACKING_PHONE.e164),
+  );
   return {
-    display: formatDidDisplay(e164, fallback.display),
+    display: formatDidDisplay(e164, TRACKING_PHONE.display),
     e164,
     tel: `tel:${e164}`,
+    schemaTelephone: formatSchemaTelephone(e164, TRACKING_PHONE.schema),
   };
 }
 
