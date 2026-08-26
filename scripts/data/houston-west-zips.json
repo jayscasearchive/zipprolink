@@ -1,0 +1,22 @@
+[
+  { "zip_code": "77494", "city": "Katy", "state_id": "TX", "state_name": "Texas", "county_name": "Fort Bend", "latitude": 29.742, "longitude": -95.832, "population": 118000, "density": 3100 },
+  { "zip_code": "77450", "city": "Katy", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.761, "longitude": -95.748, "population": 78000, "density": 2900 },
+  { "zip_code": "77449", "city": "Katy", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.828, "longitude": -95.733, "population": 125000, "density": 4200 },
+  { "zip_code": "77493", "city": "Katy", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.805, "longitude": -95.824, "population": 45000, "density": 1200 },
+  { "zip_code": "77479", "city": "Sugar Land", "state_id": "TX", "state_name": "Texas", "county_name": "Fort Bend", "latitude": 29.578, "longitude": -95.636, "population": 82000, "density": 3400 },
+  { "zip_code": "77478", "city": "Sugar Land", "state_id": "TX", "state_name": "Texas", "county_name": "Fort Bend", "latitude": 29.62, "longitude": -95.602, "population": 31000, "density": 2800 },
+  { "zip_code": "77498", "city": "Sugar Land", "state_id": "TX", "state_name": "Texas", "county_name": "Fort Bend", "latitude": 29.638, "longitude": -95.67, "population": 62000, "density": 3100 },
+  { "zip_code": "77406", "city": "Richmond", "state_id": "TX", "state_name": "Texas", "county_name": "Fort Bend", "latitude": 29.61, "longitude": -95.795, "population": 42000, "density": 1600 },
+  { "zip_code": "77407", "city": "Richmond", "state_id": "TX", "state_name": "Texas", "county_name": "Fort Bend", "latitude": 29.664, "longitude": -95.708, "population": 55000, "density": 2400 },
+  { "zip_code": "77459", "city": "Missouri City", "state_id": "TX", "state_name": "Texas", "county_name": "Fort Bend", "latitude": 29.548, "longitude": -95.539, "population": 74000, "density": 2700 },
+  { "zip_code": "77489", "city": "Missouri City", "state_id": "TX", "state_name": "Texas", "county_name": "Fort Bend", "latitude": 29.612, "longitude": -95.498, "population": 38000, "density": 3200 },
+  { "zip_code": "77429", "city": "Cypress", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.988, "longitude": -95.688, "population": 92000, "density": 2100 },
+  { "zip_code": "77433", "city": "Cypress", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.932, "longitude": -95.761, "population": 98000, "density": 2300 },
+  { "zip_code": "77077", "city": "Houston", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.756, "longitude": -95.607, "population": 58000, "density": 6200 },
+  { "zip_code": "77079", "city": "Houston", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.78, "longitude": -95.602, "population": 34000, "density": 3800 },
+  { "zip_code": "77082", "city": "Houston", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.718, "longitude": -95.608, "population": 57000, "density": 6500 },
+  { "zip_code": "77042", "city": "Houston", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.728, "longitude": -95.556, "population": 49000, "density": 5600 },
+  { "zip_code": "77063", "city": "Houston", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.736, "longitude": -95.513, "population": 41000, "density": 7100 },
+  { "zip_code": "77057", "city": "Houston", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.749, "longitude": -95.489, "population": 39000, "density": 6900 },
+  { "zip_code": "77056", "city": "Houston", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.752, "longitude": -95.467, "population": 24000, "density": 4800 }
+]
