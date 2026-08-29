@@ -1,5 +1,10 @@
 import { cache } from "react";
 import { LOCALES, type AppLocale } from "@/lib/i18n";
+import {
+  hasValidCoordinates,
+  pickNeighboringZips,
+  type GeoZip,
+} from "@/lib/neighbors";
 import { citySlug, parseStateId } from "@/lib/paths";
 import { currentPhaseService, isPhaseCoverage } from "@/lib/ssot";
 import { supabase } from "@/lib/supabase";
@@ -81,45 +86,61 @@ export async function getZipCode(zipCode: string): Promise<ZipCode | null> {
   return data;
 }
 
+function toGeoZip(zip: {
+  zip_code: string;
+  city: string;
+  county_name: string | null;
+  state_id: string;
+  state_name: string;
+  latitude: number | null;
+  longitude: number | null;
+}): GeoZip | null {
+  if (!hasValidCoordinates(zip)) {
+    return null;
+  }
+
+  return {
+    zip_code: zip.zip_code,
+    city: zip.city,
+    county_name: zip.county_name,
+    state_id: zip.state_id,
+    state_name: zip.state_name,
+    latitude: zip.latitude,
+    longitude: zip.longitude,
+  };
+}
+
 export async function getNeighboringZips(
   zip: ZipCode,
   limit = 8,
 ): Promise<NeighborZip[]> {
-  const select = "zip_code, city, state_id, state_name";
+  const origin = toGeoZip(zip);
+  if (!origin) {
+    return [];
+  }
 
-  const { data: sameCity, error: cityError } = await supabase
+  const { data, error } = await supabase
     .from("zip_codes")
-    .select(select)
-    .eq("state_id", zip.state_id)
-    .eq("city", zip.city)
-    .neq("zip_code", zip.zip_code)
-    .order("zip_code", { ascending: true })
-    .limit(limit);
+    .select(
+      "zip_code, city, county_name, state_id, state_name, latitude, longitude",
+    )
+    .eq("state_id", zip.state_id);
 
-  if (cityError) {
-    console.error("neighboring zip lookup failed", cityError.message);
+  if (error) {
+    console.error("neighboring zip lookup failed", error.message);
+    return [];
   }
 
-  const neighbors: NeighborZip[] = sameCity ?? [];
-  if (neighbors.length >= limit) {
-    return neighbors.slice(0, limit);
-  }
+  const candidates = (data ?? [])
+    .map(toGeoZip)
+    .filter((candidate): candidate is GeoZip => candidate !== null);
 
-  const { data: sameState, error: stateError } = await supabase
-    .from("zip_codes")
-    .select(select)
-    .eq("state_id", zip.state_id)
-    .neq("zip_code", zip.zip_code)
-    .neq("city", zip.city)
-    .order("zip_code", { ascending: true })
-    .limit(limit - neighbors.length);
-
-  if (stateError) {
-    console.error("statewide neighbor lookup failed", stateError.message);
-    return neighbors;
-  }
-
-  return [...neighbors, ...(sameState ?? [])];
+  return pickNeighboringZips(origin, candidates, limit).map(({ zip: neighbor }) => ({
+    zip_code: neighbor.zip_code,
+    city: neighbor.city,
+    state_id: neighbor.state_id,
+    state_name: neighbor.state_name,
+  }));
 }
 
 export async function getPhaseCoverageZips(): Promise<CoverageZip[]> {
