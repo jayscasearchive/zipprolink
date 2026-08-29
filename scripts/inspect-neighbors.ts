@@ -1,9 +1,32 @@
 import { createServiceRoleClient } from "./lib/env.mjs";
 import {
+  hasValidCoordinates,
   pickNeighboringZips,
-  toGeoZip,
   type GeoZip,
 } from "../src/lib/neighbors";
+
+function toGeoZip(row: {
+  zip_code: string;
+  city: string;
+  county_name: string | null;
+  state_id: string;
+  state_name: string;
+  latitude: number | null;
+  longitude: number | null;
+}): GeoZip | null {
+  if (!hasValidCoordinates(row)) {
+    return null;
+  }
+  return {
+    zip_code: row.zip_code,
+    city: row.city,
+    county_name: row.county_name,
+    state_id: row.state_id,
+    state_name: row.state_name,
+    latitude: row.latitude,
+    longitude: row.longitude,
+  };
+}
 
 async function main() {
   const samples = process.argv.slice(2);

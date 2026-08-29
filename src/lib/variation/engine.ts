@@ -72,17 +72,11 @@ function assembleVariation(
   locale: "en" | "es",
 ): PageVariation {
   const hash = hashZipCode(zip.zip_code, service.slug);
-  const layoutId: LayoutId =
-    LAYOUT_IDS[pickIndex(hash, LAYOUT_IDS.length, 1)] ?? "emergency";
+  const layoutId: LayoutId = LAYOUT_IDS[pickIndex(hash, LAYOUT_IDS.length, 1)];
   const pack: IntentPack = (locale === "es" ? ES_INTENTS : EN_INTENTS)[layoutId];
   const ctx = buildCopyContext(service, zip, locale);
 
-  const heroHook =
-    pack.hooks[pickIndex(hash, pack.hooks.length, 2)] ?? pack.hooks[0];
-  if (!heroHook) {
-    throw new Error(`Missing hero copy for intent ${layoutId}`);
-  }
-  const hero = heroHook(ctx);
+  const hero = pack.hooks[pickIndex(hash, pack.hooks.length, 2)](ctx);
   const intro = pack.intro(ctx);
   const aside = pack.aside(ctx);
   const chips = pack.chips(ctx);
