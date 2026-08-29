@@ -77,10 +77,16 @@ export function buildPageJsonLd(
 
   const pricingFaqs = variation.jobEstimates.map((job) => ({
     "@type": "Question",
-    name: `What does ${job.job} cost in ${data.zip.city}, ${data.zip.state_id} ${data.zip.zip_code}?`,
+    name:
+      locale === "es"
+        ? `¿Cuánto cuesta ${job.job} en ${data.zip.city}, ${data.zip.state_id} ${data.zip.zip_code}?`
+        : `What does ${job.job} cost in ${data.zip.city}, ${data.zip.state_id} ${data.zip.zip_code}?`,
     acceptedAnswer: {
       "@type": "Answer",
-      text: `Typical ${job.job.toLowerCase()} cost in ${data.zip.zip_code} is ${job.price}. Dispatch time is about ${job.time}. ${job.note}`,
+      text:
+        locale === "es"
+          ? `El costo típico de ${job.job.toLowerCase()} en ${data.zip.zip_code} es ${job.price}. El tiempo de despacho es unos ${job.time}. ${job.note}`
+          : `Typical ${job.job.toLowerCase()} cost in ${data.zip.zip_code} is ${job.price}. Dispatch time is about ${job.time}. ${job.note}`,
     },
   }));
 

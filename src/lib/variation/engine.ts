@@ -1,31 +1,38 @@
-import { locationLabel, priceRange, shortServiceName, currentSeoYear } from "@/lib/content";
+import { locationLabel, priceRange, shortServiceName } from "@/lib/content";
 import type { ServiceCategory, ZipCode } from "@/lib/types";
 import { hashZipCode, pickIndex, pickUnique } from "@/lib/variation/hash";
 import {
-  BODY_TEMPLATES,
-  DPS_TRUST,
-  HERO_HOOKS,
+  EN_INTENTS,
+  HERO_PANEL,
   LAYOUT_IDS,
   LAYOUT_ORDERS,
-  LOCKSMITH_CHECKLISTS,
-  buildMetaDescription,
+  PAGE_CHROME_EN,
+  PRICING_TABLE_EN,
   classifyDensity,
   densityCopy,
   densityLabel,
   emptyPopulationFallback,
-  faqPool,
+  emptyPopulationFallbackEs,
   interpolateList,
   locksmithJobs,
   populationLabel,
-  processCopy,
-  requiredFaqs,
+  populationLabelEs,
   type CopyContext,
+  type IntentPack,
 } from "@/lib/variation/pools";
-import type { PageVariation } from "@/lib/variation/types";
+import {
+  ES_INTENTS,
+  PAGE_CHROME_ES,
+  PRICING_TABLE_ES,
+  densityCopyEs,
+  densityLabelEs,
+} from "@/lib/variation/es-blocks";
+import type { LayoutId, PageVariation } from "@/lib/variation/types";
 
 export function buildCopyContext(
   service: ServiceCategory,
   zip: ZipCode,
+  locale: "en" | "es" = "en",
 ): CopyContext {
   const band = classifyDensity(zip.density);
   const shortName = shortServiceName(service);
@@ -43,67 +50,108 @@ export function buildCopyContext(
     responseTime: service.avg_response_time,
     priceRange: priceRange(service),
     densityBand: band,
-    densityLabel: densityLabel(band),
+    densityLabel: locale === "es" ? densityLabelEs(band) : densityLabel(band),
     densityCopy: "",
-    populationLabel: populationLabel(zip.population),
+    populationLabel:
+      locale === "es"
+        ? populationLabelEs(zip.population)
+        : populationLabel(zip.population),
   };
-  ctx.densityCopy = densityCopy(ctx);
-  ctx.populationLabel = emptyPopulationFallback(ctx);
+  ctx.densityCopy =
+    locale === "es" ? densityCopyEs(ctx) : densityCopy(ctx);
+  ctx.populationLabel =
+    locale === "es"
+      ? emptyPopulationFallbackEs(ctx)
+      : emptyPopulationFallback(ctx);
   return ctx;
 }
 
-export function buildPageVariation(
+function assembleVariation(
   service: ServiceCategory,
   zip: ZipCode,
+  locale: "en" | "es",
 ): PageVariation {
   const hash = hashZipCode(zip.zip_code, service.slug);
-  const ctx = buildCopyContext(service, zip);
+  const layoutId: LayoutId = LAYOUT_IDS[pickIndex(hash, LAYOUT_IDS.length, 1)];
+  const pack: IntentPack = (locale === "es" ? ES_INTENTS : EN_INTENTS)[layoutId];
+  const ctx = buildCopyContext(service, zip, locale);
 
-  const layoutId = LAYOUT_IDS[pickIndex(hash, LAYOUT_IDS.length, 1)];
-  const hero = HERO_HOOKS[pickIndex(hash, HERO_HOOKS.length, 2)](ctx);
-  const body = BODY_TEMPLATES[pickIndex(hash, BODY_TEMPLATES.length, 3)](ctx);
-  const dps = DPS_TRUST[pickIndex(hash, DPS_TRUST.length, 4)](ctx);
-  const process = processCopy(ctx);
+  const hero = pack.hooks[pickIndex(hash, pack.hooks.length, 2)](ctx);
+  const intro = pack.intro(ctx);
+  const aside = pack.aside(ctx);
+  const chips = pack.chips(ctx);
+  const dps = pack.dps(ctx);
+  const process = pack.process(ctx);
+  const pricing = pack.pricing(ctx);
+  const checklist = interpolateList(pack.checklist, ctx);
 
-  const checklistSource =
-    LOCKSMITH_CHECKLISTS[pickIndex(hash, LOCKSMITH_CHECKLISTS.length, 5)] ??
-    LOCKSMITH_CHECKLISTS[0];
-  const checklist = interpolateList(checklistSource, ctx);
-
+  const extraPool = pack.extraFaqs(ctx);
   const extraCount = 1 + pickIndex(hash, 2, 6);
-  const extras = pickUnique(faqPool(ctx), hash ^ 0x9e3779b9, extraCount);
-  const faqs = [...requiredFaqs(ctx), ...extras];
+  const extraIndexes = pickUnique(
+    extraPool.map((_, index) => index),
+    hash ^ 0x9e3779b9,
+    extraCount,
+  );
+  const faqs = [
+    ...pack.requiredFaqs(ctx),
+    ...extraIndexes.flatMap((index) => {
+      const item = extraPool[index];
+      return item ? [item] : [];
+    }),
+  ];
 
   const urbanLift = ctx.densityBand === "urban" ? 1.08 : 1;
+  const heroPanel = HERO_PANEL[layoutId];
 
   return {
     hash,
     layoutId,
+    heroPanel,
+    showPricingInHero: layoutId === "cost",
+    showNeighborsInHero: layoutId === "neighborhood",
     sectionOrder: LAYOUT_ORDERS[layoutId],
     densityBand: ctx.densityBand,
     densityLabel: ctx.densityLabel,
     densityCopy: ctx.densityCopy,
     headline: hero.headline,
     heroSupport: hero.support,
-    asideTitle: body.asideTitle,
-    asideBody: body.asideBody,
-    introHeading: body.heading,
-    introParagraphs: body.paragraphs,
-    checklistHeading: body.checklistHeading,
+    asideTitle: aside.title,
+    asideBody: aside.body,
+    asideMetric: aside.metric,
+    asideMetricLabel: aside.metricLabel,
+    chipPrimaryLabel: chips.primaryLabel,
+    chipPrimaryValue: chips.primaryValue,
+    chipSecondaryLabel: chips.secondaryLabel,
+    chipSecondaryValue: chips.secondaryValue,
+    introHeading: intro.heading,
+    introParagraphs: intro.paragraphs,
+    checklistHeading: intro.checklistHeading,
     checklist,
-    localHeading: body.localHeading,
-    localBody: body.localBody,
+    localHeading: intro.localHeading,
+    localBody: intro.localBody,
+    neighborsEmpty: pack.neighborsEmpty(zip.state_name),
     dpsHeading: dps.heading,
     dpsBody: dps.body,
     processHeading: process.heading,
     processIntro: process.intro,
     processSteps: process.steps,
-    pricingHeading: `${currentSeoYear()} ${ctx.shortName} cost & dispatch times in ${ctx.city}`,
-    pricingIntro: `${ctx.city} emergency cost ranges and typical arrival windows for ZIP ${ctx.zip}, adjusted for this ${ctx.densityLabel.toLowerCase()} area.`,
-    jobEstimates: locksmithJobs(ctx, urbanLift),
+    pricingHeading: pricing.heading,
+    pricingIntro: pricing.intro,
+    pricingTableLabels: locale === "es" ? PRICING_TABLE_ES : PRICING_TABLE_EN,
+    jobEstimates: locksmithJobs(ctx, urbanLift, locale),
+    faqHeading: pack.faqHeading(ctx),
+    faqLead: pack.faqLead(ctx),
     faqs,
-    metaDescription: buildMetaDescription(ctx),
+    metaDescription: pack.meta(ctx),
+    chrome: locale === "es" ? PAGE_CHROME_ES : PAGE_CHROME_EN,
   };
+}
+
+export function buildPageVariation(
+  service: ServiceCategory,
+  zip: ZipCode,
+): PageVariation {
+  return assembleVariation(service, zip, "en");
 }
 
 export function localizePageVariation(
@@ -116,19 +164,5 @@ export function localizePageVariation(
     return variation;
   }
 
-  const ctx = buildCopyContext(service, zip);
-  const year = currentSeoYear();
-
-  return {
-    ...variation,
-    headline: `${year} Costo de cerrajero y despacho de emergencia 24/7 en ${ctx.city}, ${ctx.stateId} ${ctx.zip}`,
-    heroSupport: `Trabajos típicos en ${ctx.city}: ${ctx.priceRange}. Un cerrajero con licencia puede ser enviado al ZIP ${ctx.zip} en unos ${ctx.responseTime}. Estimado sin obligación.`,
-    pricingHeading: `${year} Costos y tiempos de despacho de cerrajero en ${ctx.city}`,
-    pricingIntro: `Rangos de emergencia y ventanas de llegada para el ZIP ${ctx.zip} en ${ctx.city}.`,
-    metaDescription:
-      `${year} costo de cerrajero en ${ctx.city}, ${ctx.stateId} ${ctx.zip}. Rango ${ctx.priceRange}. Despacho 24/7 en ${ctx.responseTime}.`.slice(
-        0,
-        160,
-      ),
-  };
+  return assembleVariation(service, zip, "es");
 }

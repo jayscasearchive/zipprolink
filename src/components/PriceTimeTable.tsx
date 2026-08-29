@@ -1,10 +1,12 @@
-import type { JobEstimate } from "@/lib/variation/types";
+import type { JobEstimate, PricingTableLabels } from "@/lib/variation/types";
+import { PRICING_TABLE_EN } from "@/lib/variation/pools";
 
 type PriceTimeTableProps = {
   heading: string;
   intro?: string;
   rows: JobEstimate[];
   tone?: "light" | "hero";
+  labels?: PricingTableLabels;
 };
 
 export function PriceTimeTable({
@@ -12,6 +14,7 @@ export function PriceTimeTable({
   intro,
   rows,
   tone = "light",
+  labels = PRICING_TABLE_EN,
 }: PriceTimeTableProps) {
   const isHero = tone === "hero";
 
@@ -47,11 +50,11 @@ export function PriceTimeTable({
         <table className="min-w-full text-left text-sm">
           <thead className="bg-slate-50 text-xs uppercase tracking-[0.12em] text-slate-500">
             <tr>
-              <th className="px-4 py-3 font-semibold">Service</th>
-              <th className="px-4 py-3 font-semibold">Cost range</th>
-              <th className="px-4 py-3 font-semibold">Dispatch time</th>
+              <th className="px-4 py-3 font-semibold">{labels.service}</th>
+              <th className="px-4 py-3 font-semibold">{labels.cost}</th>
+              <th className="px-4 py-3 font-semibold">{labels.dispatch}</th>
               <th className="hidden px-4 py-3 font-semibold sm:table-cell">
-                Local note
+                {labels.note}
               </th>
             </tr>
           </thead>
@@ -76,8 +79,7 @@ export function PriceTimeTable({
             : "mt-3 text-xs text-slate-500"
         }
       >
-        Ranges are estimates for this ZIP. The technician confirms the quote
-        on site before any work begins.
+        {labels.disclaimer}
       </p>
     </section>
   );

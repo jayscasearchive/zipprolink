@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "zips:upsert": "node scripts/upsert-zip-codes.mjs",
-    "neighbors:inspect": "npx --yes tsx scripts/inspect-neighbors.ts"
+    "neighbors:inspect": "npx --yes tsx scripts/inspect-neighbors.ts",
+    "intents:inspect": "npx --yes tsx scripts/inspect-intents.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.3",
