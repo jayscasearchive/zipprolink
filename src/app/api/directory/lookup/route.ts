@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { resolveCoverageLocation } from "@/lib/directory";
+import { resolveCoverageLocation } from "@/lib/coverage-lookup";
 import { currentPhaseService } from "@/lib/ssot";
 
 export async function GET(request: Request) {

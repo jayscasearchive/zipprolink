@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { resolveCoverageLocation } from "@/lib/directory";
+import { resolveCoverageLocation } from "@/lib/coverage-lookup";
 import { DEFAULT_LOCALE, isAppLocale } from "@/lib/i18n";
 import { directoryPath, toInternalPath } from "@/lib/paths";
 

@@ -1,13 +1,14 @@
 import { cache } from "react";
-import { LOCALES, type AppLocale } from "@/lib/i18n";
 import {
-  hasValidCoordinates,
-  pickNeighboringZips,
-  type GeoZip,
-} from "@/lib/neighbors";
+  getPhaseCoverageZips,
+  getServiceBySlug,
+  getZipCode,
+} from "@/lib/coverage-lookup";
+import { LOCALES, type AppLocale } from "@/lib/i18n";
+import { pickNeighboringZips, toGeoZip, type GeoZip } from "@/lib/neighbors";
 import { citySlug, parseStateId } from "@/lib/paths";
 import { currentPhaseService, isPhaseCoverage } from "@/lib/ssot";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import type {
   DirectoryPageData,
   NeighborZip,
@@ -15,10 +16,13 @@ import type {
   ZipCode,
 } from "@/lib/types";
 
-export type CoverageZip = Pick<
-  ZipCode,
-  "zip_code" | "city" | "state_id" | "state_name"
->;
+export type { CoverageZip } from "@/lib/coverage-lookup";
+export {
+  getPhaseCoverageZips,
+  getServiceBySlug,
+  getZipCode,
+  resolveCoverageLocation,
+} from "@/lib/coverage-lookup";
 
 export type ZipStaticParam = {
   locale: AppLocale;
@@ -35,79 +39,39 @@ export type CityStaticParam = {
   city: string;
 };
 
-const SERVICE_SELECT_WITH_DID =
-  "id, slug, name, avg_price_min, avg_price_max, avg_response_time, is_active, created_at, phone_en, phone_es";
-const SERVICE_SELECT_BASE =
-  "id, slug, name, avg_price_min, avg_price_max, avg_response_time, is_active, created_at";
+const stateGeoCache = new Map<string, Promise<GeoZip[]>>();
 
-export async function getServiceBySlug(
-  slug: string,
-): Promise<ServiceCategory | null> {
-  const withDid = await supabase
-    .from("service_categories")
-    .select(SERVICE_SELECT_WITH_DID)
-    .eq("slug", slug)
-    .eq("is_active", true)
-    .maybeSingle();
-
-  if (!withDid.error) {
-    return withDid.data;
+function getStateGeoZips(stateId: string): Promise<GeoZip[]> {
+  const key = stateId.trim().toUpperCase();
+  const existing = stateGeoCache.get(key);
+  if (existing) {
+    return existing;
   }
 
-  const { data, error } = await supabase
-    .from("service_categories")
-    .select(SERVICE_SELECT_BASE)
-    .eq("slug", slug)
-    .eq("is_active", true)
-    .maybeSingle();
-
-  if (error) {
-    console.error("service_categories lookup failed", error.message);
-    return null;
-  }
-
-  return data;
+  const pending = fetchStateGeoZips(key).catch((error: unknown) => {
+    stateGeoCache.delete(key);
+    throw error;
+  });
+  stateGeoCache.set(key, pending);
+  return pending;
 }
 
-export async function getZipCode(zipCode: string): Promise<ZipCode | null> {
-  const { data, error } = await supabase
+async function fetchStateGeoZips(stateId: string): Promise<GeoZip[]> {
+  const { data, error } = await getSupabase()
     .from("zip_codes")
     .select(
-      "zip_code, city, county_name, state_id, state_name, latitude, longitude, population, density, created_at",
+      "zip_code, city, county_name, state_id, state_name, latitude, longitude",
     )
-    .eq("zip_code", zipCode)
-    .maybeSingle();
+    .eq("state_id", stateId);
 
   if (error) {
-    console.error("zip_codes lookup failed", error.message);
-    return null;
+    console.error("neighboring zip lookup failed", error.message);
+    return [];
   }
 
-  return data;
-}
-
-function toGeoZip(zip: {
-  zip_code: string;
-  city: string;
-  county_name: string | null;
-  state_id: string;
-  state_name: string;
-  latitude: number | null;
-  longitude: number | null;
-}): GeoZip | null {
-  if (!hasValidCoordinates(zip)) {
-    return null;
-  }
-
-  return {
-    zip_code: zip.zip_code,
-    city: zip.city,
-    county_name: zip.county_name,
-    state_id: zip.state_id,
-    state_name: zip.state_name,
-    latitude: zip.latitude,
-    longitude: zip.longitude,
-  };
+  return (data ?? [])
+    .map(toGeoZip)
+    .filter((candidate): candidate is GeoZip => candidate !== null);
 }
 
 export async function getNeighboringZips(
@@ -119,45 +83,13 @@ export async function getNeighboringZips(
     return [];
   }
 
-  const { data, error } = await supabase
-    .from("zip_codes")
-    .select(
-      "zip_code, city, county_name, state_id, state_name, latitude, longitude",
-    )
-    .eq("state_id", zip.state_id);
-
-  if (error) {
-    console.error("neighboring zip lookup failed", error.message);
-    return [];
-  }
-
-  const candidates = (data ?? [])
-    .map(toGeoZip)
-    .filter((candidate): candidate is GeoZip => candidate !== null);
-
+  const candidates = await getStateGeoZips(zip.state_id);
   return pickNeighboringZips(origin, candidates, limit).map(({ zip: neighbor }) => ({
     zip_code: neighbor.zip_code,
     city: neighbor.city,
     state_id: neighbor.state_id,
     state_name: neighbor.state_name,
   }));
-}
-
-export async function getPhaseCoverageZips(): Promise<CoverageZip[]> {
-  const service = currentPhaseService();
-  const { data: zips, error } = await supabase
-    .from("zip_codes")
-    .select("zip_code, city, state_id, state_name")
-    .order("zip_code", { ascending: true });
-
-  if (error) {
-    console.error("phase coverage zip lookup failed", error.message);
-    return [];
-  }
-
-  return (zips ?? []).filter((zip) =>
-    isPhaseCoverage(service.slug, zip.state_id),
-  );
 }
 
 export async function getZipStaticParams(): Promise<ZipStaticParam[]> {
@@ -239,22 +171,6 @@ export async function getCityHubData(
   };
 }
 
-export async function resolveCoverageLocation(
-  serviceSlug: string,
-  zipCode: string,
-) {
-  const [service, zip] = await Promise.all([
-    getServiceBySlug(serviceSlug),
-    getZipCode(zipCode),
-  ]);
-
-  if (!service || !zip || !isPhaseCoverage(service.slug, zip.state_id)) {
-    return null;
-  }
-
-  return { service, zip };
-}
-
 export const getDirectoryPageData = cache(async function getDirectoryPageData(
   serviceSlug: string,
   zipCode: string,
@@ -276,7 +192,7 @@ export const getDirectoryPageData = cache(async function getDirectoryPageData(
 export async function getActiveServices(): Promise<
   Pick<ServiceCategory, "slug" | "name">[]
 > {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from("service_categories")
     .select("slug, name")
     .eq("is_active", true)

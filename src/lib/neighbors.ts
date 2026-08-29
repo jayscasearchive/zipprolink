@@ -18,16 +18,50 @@ export type RankedNeighbor = {
   miles: number;
 };
 
+export function toFiniteNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
 export function hasValidCoordinates(zip: {
-  latitude: number | null | undefined;
-  longitude: number | null | undefined;
-}): zip is { latitude: number; longitude: number } {
+  latitude: unknown;
+  longitude: unknown;
+}): boolean {
   return (
-    typeof zip.latitude === "number" &&
-    typeof zip.longitude === "number" &&
-    Number.isFinite(zip.latitude) &&
-    Number.isFinite(zip.longitude)
+    toFiniteNumber(zip.latitude) != null && toFiniteNumber(zip.longitude) != null
   );
+}
+
+export function toGeoZip(zip: {
+  zip_code: string;
+  city: string;
+  county_name: string | null;
+  state_id: string;
+  state_name: string;
+  latitude: unknown;
+  longitude: unknown;
+}): GeoZip | null {
+  const latitude = toFiniteNumber(zip.latitude);
+  const longitude = toFiniteNumber(zip.longitude);
+  if (latitude == null || longitude == null) {
+    return null;
+  }
+
+  return {
+    zip_code: zip.zip_code,
+    city: zip.city,
+    county_name: zip.county_name,
+    state_id: zip.state_id,
+    state_name: zip.state_name,
+    latitude,
+    longitude,
+  };
 }
 
 export function haversineMiles(
