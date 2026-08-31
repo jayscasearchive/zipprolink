@@ -5,7 +5,13 @@ import {
   pickNeighboringZips,
   type GeoZip,
 } from "@/lib/neighbors";
-import { citySlug, parseStateId } from "@/lib/paths";
+import {
+  citySlug,
+  countyDisplayName,
+  countySlug,
+  hasCountyName,
+  parseStateId,
+} from "@/lib/paths";
 import { currentPhaseService, isPhaseCoverage } from "@/lib/ssot";
 import { supabase } from "@/lib/supabase";
 import type {
@@ -17,7 +23,7 @@ import type {
 
 export type CoverageZip = Pick<
   ZipCode,
-  "zip_code" | "city" | "state_id" | "state_name"
+  "zip_code" | "city" | "county_name" | "state_id" | "state_name"
 >;
 
 export type ZipStaticParam = {
@@ -33,6 +39,23 @@ export type CityStaticParam = {
   service: string;
   state: string;
   city: string;
+};
+
+export type CountyStaticParam = {
+  locale: AppLocale;
+  service: string;
+  state: string;
+  county: string;
+};
+
+export type CountyHubSummary = {
+  service: string;
+  stateId: string;
+  countyName: string;
+  countySlug: string;
+  countyLabel: string;
+  zipCount: number;
+  cityCount: number;
 };
 
 const SERVICE_SELECT_WITH_DID =
@@ -147,7 +170,7 @@ export async function getPhaseCoverageZips(): Promise<CoverageZip[]> {
   const service = currentPhaseService();
   const { data: zips, error } = await supabase
     .from("zip_codes")
-    .select("zip_code, city, state_id, state_name")
+    .select("zip_code, city, county_name, state_id, state_name")
     .order("zip_code", { ascending: true });
 
   if (error) {
@@ -202,6 +225,30 @@ export async function getCityStaticParams(): Promise<CityStaticParam[]> {
   return hubs;
 }
 
+export function countiesFromZips(zips: CoverageZip[]) {
+  const map = new Map<
+    string,
+    { slug: string; name: string; label: string }
+  >();
+
+  for (const zip of zips) {
+    if (!hasCountyName(zip.county_name)) {
+      continue;
+    }
+
+    const slug = countySlug(zip.county_name);
+    if (!map.has(slug)) {
+      map.set(slug, {
+        slug,
+        name: zip.county_name,
+        label: countyDisplayName(zip.county_name),
+      });
+    }
+  }
+
+  return [...map.values()].sort((a, b) => a.label.localeCompare(b.label));
+}
+
 export async function getCityHubData(
   serviceSlug: string,
   stateSlugValue: string,
@@ -236,6 +283,130 @@ export async function getCityHubData(
     cityName: sample.city,
     citySlug: citySlug(sample.city),
     zips: cityZips,
+  };
+}
+
+function uniqueCityCount(zips: CoverageZip[]) {
+  return new Set(zips.map((zip) => citySlug(zip.city))).size;
+}
+
+function groupCoverageByCounty(zips: CoverageZip[]) {
+  const groups = new Map<string, CoverageZip[]>();
+
+  for (const zip of zips) {
+    if (!hasCountyName(zip.county_name)) {
+      continue;
+    }
+
+    const key = `${zip.state_id.toUpperCase()}:${countySlug(zip.county_name)}`;
+    const list = groups.get(key) ?? [];
+    list.push(zip);
+    groups.set(key, list);
+  }
+
+  return groups;
+}
+
+export async function getCountyHubSummaries(): Promise<CountyHubSummary[]> {
+  const service = currentPhaseService();
+  const zips = await getPhaseCoverageZips();
+  const summaries: CountyHubSummary[] = [];
+
+  for (const countyZips of groupCoverageByCounty(zips).values()) {
+    const sample = countyZips[0];
+    if (!sample?.county_name || countyZips.length === 0) {
+      continue;
+    }
+
+    summaries.push({
+      service: service.slug,
+      stateId: sample.state_id,
+      countyName: sample.county_name,
+      countySlug: countySlug(sample.county_name),
+      countyLabel: countyDisplayName(sample.county_name),
+      zipCount: countyZips.length,
+      cityCount: uniqueCityCount(countyZips),
+    });
+  }
+
+  return summaries.sort((a, b) => a.countyLabel.localeCompare(b.countyLabel));
+}
+
+export async function getCountyStaticParams(): Promise<CountyStaticParam[]> {
+  const summaries = await getCountyHubSummaries();
+
+  return LOCALES.flatMap((locale) =>
+    summaries.map((hub) => ({
+      locale,
+      service: hub.service,
+      state: hub.stateId.toLowerCase(),
+      county: hub.countySlug,
+    })),
+  );
+}
+
+export async function getCountyHubData(
+  serviceSlug: string,
+  stateSlugValue: string,
+  countySlugValue: string,
+) {
+  const service = await getServiceBySlug(serviceSlug);
+  const stateId = parseStateId(stateSlugValue);
+
+  if (!service || !isPhaseCoverage(service.slug, stateId)) {
+    return null;
+  }
+
+  const zips = await getPhaseCoverageZips();
+  const countyZips = zips.filter(
+    (zip) =>
+      zip.state_id.toUpperCase() === stateId &&
+      hasCountyName(zip.county_name) &&
+      countySlug(zip.county_name) === countySlugValue,
+  );
+
+  if (!countyZips.length) {
+    return null;
+  }
+
+  const sample = countyZips[0];
+  if (!sample?.county_name) {
+    return null;
+  }
+
+  const cityGroups = new Map<
+    string,
+    { cityName: string; citySlug: string; zips: CoverageZip[] }
+  >();
+
+  for (const zip of countyZips) {
+    const slug = citySlug(zip.city);
+    const group = cityGroups.get(slug) ?? {
+      cityName: zip.city,
+      citySlug: slug,
+      zips: [],
+    };
+    group.zips.push(zip);
+    cityGroups.set(slug, group);
+  }
+
+  for (const group of cityGroups.values()) {
+    group.zips.sort((a, b) => a.zip_code.localeCompare(b.zip_code));
+  }
+
+  const cities = [...cityGroups.values()].sort((a, b) =>
+    a.cityName.localeCompare(b.cityName),
+  );
+
+  return {
+    service,
+    stateId,
+    stateName: sample.state_name,
+    countyName: sample.county_name,
+    countySlug: countySlug(sample.county_name),
+    countyLabel: countyDisplayName(sample.county_name),
+    zips: countyZips,
+    cities,
   };
 }
 

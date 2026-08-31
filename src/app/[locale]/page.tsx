@@ -5,9 +5,9 @@ import { ArrowRight, ShieldCheck, Zap } from "lucide-react";
 import { DirectorySearch } from "@/components/DirectorySearch";
 import { SITE_NAME, SITE_URL, TEST_CITIES } from "@/lib/constants";
 import { currentSeoYear } from "@/lib/content";
-import { getPhaseServices } from "@/lib/directory";
+import { getCountyHubSummaries, getPhaseServices } from "@/lib/directory";
 import { getDictionary, isAppLocale } from "@/lib/i18n";
-import { directoryPath, localeHomePath } from "@/lib/paths";
+import { countyPath, directoryPath, localeHomePath } from "@/lib/paths";
 
 export const revalidate = 86400;
 
@@ -54,7 +54,10 @@ export default async function LocaleHomePage({ params }: HomeProps) {
 
   const locale = raw;
   const copy = getDictionary(locale);
-  const serviceOptions = await getPhaseServices();
+  const [serviceOptions, countyHubs] = await Promise.all([
+    getPhaseServices(),
+    getCountyHubSummaries(),
+  ]);
   const seoYear = currentSeoYear();
 
   return (
@@ -116,6 +119,38 @@ export default async function LocaleHomePage({ params }: HomeProps) {
             </Link>
           ))}
         </div>
+        {countyHubs.length > 0 ? (
+          <div className="mt-12 min-w-0">
+            <h3 className="text-xl font-semibold tracking-tight text-navy">
+              {copy.countyHubsHeading}
+            </h3>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {countyHubs.map((hub) => (
+                <Link
+                  key={`${hub.stateId}-${hub.countySlug}`}
+                  href={countyPath({
+                    locale,
+                    service: hub.service,
+                    state: hub.stateId,
+                    county: hub.countyName,
+                  })}
+                  className="min-w-0 rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm transition hover:border-emergency/40 hover:shadow-md"
+                >
+                  <p className="text-lg font-semibold text-navy">
+                    {hub.countyLabel}
+                  </p>
+                  <p className="text-sm text-slate-500">
+                    {copy.countyHubCardMeta(
+                      hub.zipCount,
+                      hub.cityCount,
+                      hub.stateId,
+                    )}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </section>
 
       <section className="bg-slate-50">

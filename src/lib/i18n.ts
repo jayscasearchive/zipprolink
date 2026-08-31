@@ -143,6 +143,12 @@ type Dictionary = {
   cityHubH1: (year: number, city: string, state: string) => string;
   cityHubLead: (city: string, count: number) => string;
   zipListHeading: string;
+  countyHubH1: (year: number, county: string, state: string) => string;
+  countyHubLead: (county: string, zipCount: number, cityCount: number) => string;
+  countyListHeading: string;
+  countyHubsHeading: string;
+  countyHubCardMeta: (zipCount: number, cityCount: number, state: string) => string;
+  cityCountiesHeading: string;
   breadcrumbHome: string;
   faqHeading: string;
   faqLead: (zip: string) => string;
@@ -204,6 +210,15 @@ export const dictionaries: Record<AppLocale, Dictionary> = {
     cityHubLead: (city, count) =>
       `Compare locksmith cost ranges and live dispatch windows across ${count} ZIP codes in ${city}. Tap a ZIP for local pricing, or call for a no-obligation estimate.`,
     zipListHeading: "ZIP codes we dispatch in this city",
+    countyHubH1: (year, county, state) =>
+      `${year} Locksmith Cost & 24/7 Emergency Dispatch in ${county}, ${state}`,
+    countyHubLead: (county, zipCount, cityCount) =>
+      `Compare locksmith cost ranges and live dispatch windows across ${zipCount} ZIP codes in ${cityCount} ${cityCount === 1 ? "city" : "cities"} in ${county}. Tap a ZIP for local pricing, or call for a no-obligation estimate.`,
+    countyListHeading: "Cities and ZIP codes we dispatch in this county",
+    countyHubsHeading: "Counties with live listings",
+    countyHubCardMeta: (zipCount, cityCount, state) =>
+      `${zipCount} ZIP · ${cityCount} ${cityCount === 1 ? "city" : "cities"} · ${state}`,
+    cityCountiesHeading: "Counties that include this city",
     breadcrumbHome: "Home",
     faqHeading: "Frequently asked questions",
     faqLead: (zip) => `Questions hashed to ${zip} — not a statewide FAQ clone.`,
@@ -267,6 +282,15 @@ export const dictionaries: Record<AppLocale, Dictionary> = {
     cityHubLead: (city, count) =>
       `Compare rangos de costo y tiempos de despacho en ${count} códigos ZIP de ${city}. Elija un ZIP para precios locales o llame para un estimado sin obligación.`,
     zipListHeading: "Códigos ZIP con despacho en esta ciudad",
+    countyHubH1: (year, county, state) =>
+      `${year} Costo de cerrajero y despacho de emergencia 24/7 en ${county}, ${state}`,
+    countyHubLead: (county, zipCount, cityCount) =>
+      `Compare rangos de costo y tiempos de despacho en ${zipCount} códigos ZIP de ${cityCount} ${cityCount === 1 ? "ciudad" : "ciudades"} en ${county}. Elija un ZIP para precios locales o llame para un estimado sin obligación.`,
+    countyListHeading: "Ciudades y códigos ZIP con despacho en este condado",
+    countyHubsHeading: "Condados con listados en vivo",
+    countyHubCardMeta: (zipCount, cityCount, state) =>
+      `${zipCount} ZIP · ${cityCount} ${cityCount === 1 ? "ciudad" : "ciudades"} · ${state}`,
+    cityCountiesHeading: "Condados que incluyen esta ciudad",
     breadcrumbHome: "Inicio",
     faqHeading: "Preguntas frecuentes",
     faqLead: (zip) =>

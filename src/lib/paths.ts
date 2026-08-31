@@ -2,6 +2,8 @@ import type { AppLocale } from "@/lib/i18n";
 import { DEFAULT_LOCALE, isAppLocale } from "@/lib/i18n";
 import { currentPhaseService, currentPhaseStateIds } from "@/lib/ssot";
 
+export const COUNTY_SEGMENT = "county";
+
 export function citySlug(city: string) {
   return city
     .normalize("NFKD")
@@ -9,6 +11,23 @@ export function citySlug(city: string) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+const COUNTY_SUFFIX = /\s+county$/i;
+
+export function hasCountyName(
+  county: string | null | undefined,
+): county is string {
+  return Boolean(county?.replace(COUNTY_SUFFIX, "").trim());
+}
+
+export function countySlug(county: string) {
+  return citySlug(county.replace(COUNTY_SUFFIX, "").trim());
+}
+
+export function countyDisplayName(county: string) {
+  const base = county.replace(COUNTY_SUFFIX, "").trim();
+  return base ? `${base} County` : "";
 }
 
 export function stateSlug(stateId: string) {
@@ -55,6 +74,32 @@ export function directoryPath({
   return joinPath([locale, ...parts]);
 }
 
+type CountyPathInput = {
+  locale?: AppLocale;
+  service: string;
+  state: string;
+  county: string;
+};
+
+/** Public county hub. `/locksmith/tx/county/harris` — never collides with a city slug. */
+export function countyPath({
+  locale = DEFAULT_LOCALE,
+  service,
+  state,
+  county,
+}: CountyPathInput) {
+  const parts = [
+    service,
+    stateSlug(state),
+    COUNTY_SEGMENT,
+    countySlug(county),
+  ];
+  if (locale === DEFAULT_LOCALE) {
+    return joinPath(parts);
+  }
+  return joinPath([locale, ...parts]);
+}
+
 export function localeHomePath(locale: AppLocale = DEFAULT_LOCALE) {
   return locale === DEFAULT_LOCALE ? "/" : `/${locale}`;
 }
@@ -86,8 +131,16 @@ function injectCurrentService(segments: string[]) {
     return [service, ...segments.slice(1)];
   }
 
+  const isCountyHub =
+    city?.toLowerCase() === COUNTY_SEGMENT && Boolean(zip) && !extra;
+
+  if (isPhaseStateSlug(first) && isCountyHub) {
+    return [service, first.toLowerCase(), COUNTY_SEGMENT, countySlug(zip)];
+  }
+
   const isCityHubOrZip =
     Boolean(city) &&
+    city.toLowerCase() !== COUNTY_SEGMENT &&
     !extra &&
     (!zip || /^\d{5}$/.test(zip));
 

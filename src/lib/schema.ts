@@ -1,7 +1,13 @@
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { locationLabel, priceRange, shortServiceName } from "@/lib/content";
 import { getDictionary, getLocalePhone, type AppLocale } from "@/lib/i18n";
-import { directoryPath, localeHomePath } from "@/lib/paths";
+import {
+  countyDisplayName,
+  countyPath,
+  directoryPath,
+  hasCountyName,
+  localeHomePath,
+} from "@/lib/paths";
 import type { DirectoryPageData, ZipCode } from "@/lib/types";
 import type { PageVariation } from "@/lib/variation/types";
 
@@ -107,28 +113,47 @@ export function buildPageJsonLd(
     state: data.zip.state_id,
     city: data.zip.city,
   })}`;
+  const crumbItems = [
+    {
+      "@type": "ListItem" as const,
+      position: 1,
+      name: copy.breadcrumbHome,
+      item: `${SITE_URL}${localeHomePath(locale)}`,
+    },
+  ];
+
+  if (hasCountyName(data.zip.county_name)) {
+    crumbItems.push({
+      "@type": "ListItem" as const,
+      position: crumbItems.length + 1,
+      name: countyDisplayName(data.zip.county_name),
+      item: `${SITE_URL}${countyPath({
+        locale,
+        service: data.service.slug,
+        state: data.zip.state_id,
+        county: data.zip.county_name,
+      })}`,
+    });
+  }
+
+  crumbItems.push(
+    {
+      "@type": "ListItem" as const,
+      position: crumbItems.length + 1,
+      name: data.zip.city,
+      item: cityUrl,
+    },
+    {
+      "@type": "ListItem" as const,
+      position: crumbItems.length + 2,
+      name: data.zip.zip_code,
+      item: pageUrl,
+    },
+  );
+
   const breadcrumb = {
     "@type": "BreadcrumbList" as const,
-    itemListElement: [
-      {
-        "@type": "ListItem" as const,
-        position: 1,
-        name: copy.breadcrumbHome,
-        item: `${SITE_URL}${localeHomePath(locale)}`,
-      },
-      {
-        "@type": "ListItem" as const,
-        position: 2,
-        name: data.zip.city,
-        item: cityUrl,
-      },
-      {
-        "@type": "ListItem" as const,
-        position: 3,
-        name: data.zip.zip_code,
-        item: pageUrl,
-      },
-    ],
+    itemListElement: crumbItems,
   };
 
   return {

@@ -3,9 +3,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { currentSeoYear } from "@/lib/content";
-import { getCityHubData, getCityStaticParams } from "@/lib/directory";
+import {
+  countiesFromZips,
+  getCityHubData,
+  getCityStaticParams,
+} from "@/lib/directory";
 import { getDictionary, isAppLocale } from "@/lib/i18n";
-import { directoryPath, localeHomePath } from "@/lib/paths";
+import { countyPath, directoryPath, localeHomePath } from "@/lib/paths";
 import { isPhaseCoverage } from "@/lib/ssot";
 import { serializeJsonLd } from "@/lib/schema";
 
@@ -103,23 +107,43 @@ export default async function CityHubPage({ params }: CityHubProps) {
     city: hub.cityName,
   })}`;
 
+  const counties = countiesFromZips(hub.zips);
+  const sharedCounty = counties.length === 1 ? counties[0] : null;
+
+  const breadcrumbItems = [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: copy.breadcrumbHome,
+      item: `${SITE_URL}${localeHomePath(raw)}`,
+    },
+  ];
+
+  if (sharedCounty) {
+    breadcrumbItems.push({
+      "@type": "ListItem",
+      position: 2,
+      name: sharedCounty.label,
+      item: `${SITE_URL}${countyPath({
+        locale: raw,
+        service: hub.service.slug,
+        state: hub.stateId,
+        county: sharedCounty.name,
+      })}`,
+    });
+  }
+
+  breadcrumbItems.push({
+    "@type": "ListItem",
+    position: breadcrumbItems.length + 1,
+    name: hub.cityName,
+    item: pageUrl,
+  });
+
   const breadcrumb = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: copy.breadcrumbHome,
-        item: `${SITE_URL}${localeHomePath(raw)}`,
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: hub.cityName,
-        item: pageUrl,
-      },
-    ],
+    itemListElement: breadcrumbItems,
   };
 
   return (
@@ -134,6 +158,22 @@ export default async function CityHubPage({ params }: CityHubProps) {
             <Link href={localeHomePath(raw)} className="hover:text-white">
               {copy.breadcrumbHome}
             </Link>
+            {sharedCounty ? (
+              <>
+                <span className="px-2">/</span>
+                <Link
+                  href={countyPath({
+                    locale: raw,
+                    service: hub.service.slug,
+                    state: hub.stateId,
+                    county: sharedCounty.name,
+                  })}
+                  className="hover:text-white"
+                >
+                  {sharedCounty.label}
+                </Link>
+              </>
+            ) : null}
             <span className="px-2">/</span>
             <span className="text-white">
               {hub.cityName}, {hub.stateId}
@@ -149,6 +189,29 @@ export default async function CityHubPage({ params }: CityHubProps) {
       </section>
 
       <section className="mx-auto w-full min-w-0 max-w-6xl px-4 py-12 sm:px-6">
+        {counties.length > 1 ? (
+          <div className="mb-10 min-w-0">
+            <h2 className="text-2xl font-semibold tracking-tight text-navy">
+              {copy.cityCountiesHeading}
+            </h2>
+            <div className="mt-4 flex max-w-full min-w-0 flex-wrap gap-2">
+              {counties.map((county) => (
+                <Link
+                  key={county.slug}
+                  href={countyPath({
+                    locale: raw,
+                    service: hub.service.slug,
+                    state: hub.stateId,
+                    county: county.name,
+                  })}
+                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-navy transition hover:border-emergency/40"
+                >
+                  {county.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        ) : null}
         <h2 className="text-2xl font-semibold tracking-tight text-navy">
           {copy.zipListHeading}
         </h2>
