@@ -1,10 +1,23 @@
 import { currentPhaseService } from "@/lib/ssot";
 import { PHONE_DID } from "@/lib/i18n";
 
+function canonicalSiteUrl(raw: string) {
+  try {
+    const url = new URL(raw);
+    if (url.hostname === "zipprolink.com") {
+      url.hostname = "www.zipprolink.com";
+    }
+    return url.origin;
+  } catch {
+    return "https://www.zipprolink.com";
+  }
+}
+
 export const SITE_NAME = "ZipProLink";
 export const SITE_TAGLINE = "24/7 Emergency Locksmith Cost & Dispatch · Texas";
-export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://zipprolink.com";
+export const SITE_URL = canonicalSiteUrl(
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.zipprolink.com",
+);
 
 export const HOTLINE_DISPLAY = PHONE_DID.en.display;
 export const HOTLINE_E164 = PHONE_DID.en.e164;

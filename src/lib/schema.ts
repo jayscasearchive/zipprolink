@@ -1,6 +1,7 @@
-import { SITE_NAME } from "@/lib/constants";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { locationLabel, priceRange, shortServiceName } from "@/lib/content";
-import { getLocalePhone, type AppLocale } from "@/lib/i18n";
+import { getDictionary, getLocalePhone, type AppLocale } from "@/lib/i18n";
+import { directoryPath, localeHomePath } from "@/lib/paths";
 import type { DirectoryPageData, ZipCode } from "@/lib/types";
 import type { PageVariation } from "@/lib/variation/types";
 
@@ -99,9 +100,41 @@ export function buildPageJsonLd(
     },
   }));
 
+  const copy = getDictionary(locale);
+  const cityUrl = `${SITE_URL}${directoryPath({
+    locale,
+    service: data.service.slug,
+    state: data.zip.state_id,
+    city: data.zip.city,
+  })}`;
+  const breadcrumb = {
+    "@type": "BreadcrumbList" as const,
+    itemListElement: [
+      {
+        "@type": "ListItem" as const,
+        position: 1,
+        name: copy.breadcrumbHome,
+        item: `${SITE_URL}${localeHomePath(locale)}`,
+      },
+      {
+        "@type": "ListItem" as const,
+        position: 2,
+        name: data.zip.city,
+        item: cityUrl,
+      },
+      {
+        "@type": "ListItem" as const,
+        position: 3,
+        name: data.zip.zip_code,
+        item: pageUrl,
+      },
+    ],
+  };
+
   return {
     "@context": "https://schema.org",
     "@graph": [
+      breadcrumb,
       {
         "@type": "EmergencyService",
         name: `${SITE_NAME} 24/7 Emergency ${shortName}`,
