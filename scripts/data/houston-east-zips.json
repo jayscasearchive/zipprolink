@@ -1,0 +1,22 @@
+[
+  { "zip_code": "77502", "city": "Pasadena", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.6789, "longitude": -95.1982, "population": 35000, "density": 4200 },
+  { "zip_code": "77503", "city": "Pasadena", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.6877, "longitude": -95.1572, "population": 38000, "density": 4000 },
+  { "zip_code": "77504", "city": "Pasadena", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.6501, "longitude": -95.1885, "population": 25000, "density": 3200 },
+  { "zip_code": "77505", "city": "Pasadena", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.6518, "longitude": -95.1464, "population": 32000, "density": 2800 },
+  { "zip_code": "77506", "city": "Pasadena", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.7009, "longitude": -95.199, "population": 37000, "density": 4500 },
+  { "zip_code": "77581", "city": "Pearland", "state_id": "TX", "state_name": "Texas", "county_name": "Brazoria", "latitude": 29.5617, "longitude": -95.2721, "population": 28000, "density": 2200 },
+  { "zip_code": "77584", "city": "Pearland", "state_id": "TX", "state_name": "Texas", "county_name": "Brazoria", "latitude": 29.5405, "longitude": -95.3208, "population": 85000, "density": 3100 },
+  { "zip_code": "77536", "city": "Deer Park", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.6826, "longitude": -95.1222, "population": 33000, "density": 1800 },
+  { "zip_code": "77571", "city": "La Porte", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.6884, "longitude": -95.0513, "population": 36000, "density": 1500 },
+  { "zip_code": "77520", "city": "Baytown", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.7461, "longitude": -94.9653, "population": 39000, "density": 2100 },
+  { "zip_code": "77521", "city": "Baytown", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.7705, "longitude": -94.9695, "population": 48000, "density": 2300 },
+  { "zip_code": "77573", "city": "League City", "state_id": "TX", "state_name": "Texas", "county_name": "Galveston", "latitude": 29.5173, "longitude": -95.0963, "population": 92000, "density": 2400 },
+  { "zip_code": "77546", "city": "Friendswood", "state_id": "TX", "state_name": "Texas", "county_name": "Galveston", "latitude": 29.5224, "longitude": -95.1879, "population": 41000, "density": 1900 },
+  { "zip_code": "77587", "city": "South Houston", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.6601, "longitude": -95.2258, "population": 21000, "density": 4800 },
+  { "zip_code": "77598", "city": "Webster", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.5564, "longitude": -95.144, "population": 26000, "density": 2700 },
+  { "zip_code": "77017", "city": "Houston", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.6863, "longitude": -95.2555, "population": 33000, "density": 3600 },
+  { "zip_code": "77034", "city": "Houston", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.6364, "longitude": -95.2216, "population": 23000, "density": 2800 },
+  { "zip_code": "77061", "city": "Houston", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.6652, "longitude": -95.279, "population": 28000, "density": 3200 },
+  { "zip_code": "77075", "city": "Houston", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.6223, "longitude": -95.26, "population": 38000, "density": 2900 },
+  { "zip_code": "77087", "city": "Houston", "state_id": "TX", "state_name": "Texas", "county_name": "Harris", "latitude": 29.6876, "longitude": -95.3011, "population": 35000, "density": 4100 }
+]
