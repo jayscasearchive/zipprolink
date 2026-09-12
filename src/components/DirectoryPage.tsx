@@ -260,7 +260,7 @@ export function DirectoryPage({ locale, data, variation }: DirectoryPageProps) {
       </section>
 
       <section className="mx-auto w-full min-w-0 max-w-6xl px-4 py-10 sm:px-6">
-        <TrustBadges />
+        <TrustBadges locale={locale} />
       </section>
 
       <section className="bg-slate-50">

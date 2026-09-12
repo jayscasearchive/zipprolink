@@ -38,16 +38,16 @@ export const ES_INTENTS: Record<LayoutId, IntentPack> = {
   emergency: {
     hooks: [
       (ctx) => ({
-        headline: `Despacho de cerrajero de emergencia 24/7 en ${ctx.city}, ${ctx.stateId} ${ctx.zip}`,
-        support: `¿Quedó cerrado fuera de casa, auto u oficina en ${ctx.place}? Llame al ${HOTLINE_DISPLAY}. Un técnico con licencia suele salir en unos ${ctx.responseTime}. Usted aprueba el estimado en sitio antes de cualquier trabajo.`,
+        headline: `Cerrajero de emergencia en ${ctx.city} ${ctx.zip} — 24 horas`,
+        support: `¿Se quedó fuera de casa, auto u oficina en ${ctx.place}? Llame al ${HOTLINE_DISPLAY}. Un técnico con licencia suele salir en unos ${ctx.responseTime}. Usted aprueba el estimado en sitio antes de cualquier trabajo.`,
       }),
       (ctx) => ({
-        headline: `¿Cerrado fuera en ${ctx.city} ${ctx.zip}? Enrutamiento de cerrajero de emergencia`,
+        headline: `¿Se quedó fuera en ${ctx.city}? Cerrajero de emergencia ${ctx.zip}`,
         support: `Cierres de noche, fin de semana y día festivo en ${countyLabel(ctx)} siguen en un escritorio en vivo. Llegada típica ${ctx.responseTime}. No force la puerta y dé el edificio o el cruce exacto.`,
       }),
     ],
     intro: (ctx) => ({
-      heading: `Cuando un cierre de emergencia llega a ${ctx.city} ${ctx.zip}`,
+      heading: `Cerrajero de emergencia en ${ctx.city} ${ctx.zip}`,
       paragraphs: [
         `La mayoría de las llamadas en ${ctx.zip} empiezan igual: llaves en la cocina, un control muerto en el estacionamiento o una llave rota en un cilindro ${ctx.densityBand === "urban" ? "de torre" : "de la puerta"} después de medianoche. ZipProLink es el escritorio de emergencia de ese momento: una ruta de despacho hacia ${countyLabel(ctx)}, no una granja de cupones.`,
         `Como ${ctx.place} es un ZIP ${ctx.densityLabel.toLowerCase()}, primero van los técnicos que ya cubren las noches de ${ctx.city}. Usted oye la ventana de llegada (${ctx.responseTime}) antes de que salga nadie.`,
@@ -145,7 +145,7 @@ export const ES_INTENTS: Record<LayoutId, IntentPack> = {
     faqLead: (ctx) =>
       `Respuestas centradas en despacho para ${ctx.place}. Costo y licencia siguen más abajo; este bloque se queda en el tiempo de llegada.`,
     meta: (ctx) =>
-      `Despacho de cerrajero de emergencia 24/7 en ${ctx.city}, ${ctx.stateId} ${ctx.zip}. Llegada típica ${ctx.responseTime}. Llame al ${HOTLINE_DISPLAY}.`.slice(
+      `Cerrajero de emergencia en ${ctx.city} ${ctx.zip}. Llegada típica ${ctx.responseTime}. Llame al ${HOTLINE_DISPLAY}.`.slice(
         0,
         160,
       ),
@@ -157,12 +157,12 @@ export const ES_INTENTS: Record<LayoutId, IntentPack> = {
       (ctx) => {
         const year = currentSeoYear();
         return {
-          headline: `${year} Costo de cerrajero en ${ctx.city}, ${ctx.stateId} ${ctx.zip}`,
+          headline: `Cerrajero en ${ctx.city} ${ctx.zip} — costos de emergencia ${year}`,
           support: `Los trabajos típicos en ${ctx.city} rondan ${ctx.priceRange}. Ventana de llegada unos ${ctx.responseTime}. Nada aquí es una oferta vinculante — usted aprueba el estimado en sitio antes de taladrar o cambiar la combinación.`,
         };
       },
       (ctx) => ({
-        headline: `Precios y rangos de despacho de cerrajero en ${ctx.city} ${ctx.zip}`,
+        headline: `Cerrajero en ${ctx.city} ${ctx.zip}: precios y rangos`,
         support: `Compare rangos de apertura, rekey y cerradura inteligente para ${ctx.place}. El precio ${ctx.densityLabel.toLowerCase()} se ajusta a este ZIP, no a un promedio estatal.`,
       }),
     ],
@@ -257,23 +257,18 @@ export const ES_INTENTS: Record<LayoutId, IntentPack> = {
         answer: `Sí. Use los listados cercanos de esta página. Cada código guarda su propio rango para que ${countyLabel(ctx)} no comparta una sola tabla estatal clonada.`,
       },
     ],
-    pricing: (ctx) => {
-      const year = currentSeoYear();
-      return {
-        heading: `${year} Costos y tiempos de despacho de cerrajero en ${ctx.city}`,
-        intro: `Rangos de emergencia y ventanas de llegada para el ZIP ${ctx.zip} en ${ctx.city}, ajustados a esta zona ${ctx.densityLabel.toLowerCase()}.`,
-      };
-    },
+    pricing: (ctx) => ({
+      heading: `Costos de cerrajero en ${ctx.city} ${ctx.zip}`,
+      intro: `Rangos de emergencia y ventanas de llegada para el ZIP ${ctx.zip} en ${ctx.city}, ajustados a esta zona ${ctx.densityLabel.toLowerCase()}.`,
+    }),
     faqHeading: (ctx) => `Preguntas de costo para ${ctx.zip}`,
     faqLead: (ctx) =>
       `Respuestas centradas en precio para ${ctx.place}. El despacho y la licencia siguen aplicando; este bloque se queda en lo que paga.`,
-    meta: (ctx) => {
-      const year = currentSeoYear();
-      return `${year} costo de cerrajero en ${ctx.city}, ${ctx.stateId} ${ctx.zip}. Rango típico ${ctx.priceRange}. Despacho unos ${ctx.responseTime}.`.slice(
+    meta: (ctx) =>
+      `Cerrajero en ${ctx.city} ${ctx.zip}: rango típico ${ctx.priceRange}. Despacho unos ${ctx.responseTime}. Llame al ${HOTLINE_DISPLAY}.`.slice(
         0,
         160,
-      );
-    },
+      ),
     neighborsEmpty: (stateName) =>
       `Los ZIP cercanos de ${stateName} aparecerán aquí a medida que se amplíe la cobertura.`,
   },
@@ -284,7 +279,7 @@ export const ES_INTENTS: Record<LayoutId, IntentPack> = {
         support: `El Código de Ocupaciones de Texas, Capítulo 1702, pone a las empresas de cerrajería bajo el Programa de Seguridad Privada del Departamento de Seguridad Pública de Texas. ZipProLink envía trabajos de ${ctx.zip} a empresas que pueden servir legalmente ${countyLabel(ctx)}.`,
       }),
       (ctx) => ({
-        headline: `Normas TX DPS de cerrajería para ${countyLabel(ctx)} · ${ctx.zip}`,
+        headline: `Cerrajero con licencia en ${ctx.city} ${ctx.zip} — normas TX DPS`,
         support: `Pida al técnico que llega la licencia de la empresa antes de cualquier taladro en ${ctx.place}. El seguro en la camioneta es parte del mismo chequeo — una llamada barata sin licencia no es un atajo.`,
       }),
     ],
@@ -401,7 +396,7 @@ export const ES_INTENTS: Record<LayoutId, IntentPack> = {
         support: `${ctx.place} está anclado a códigos vecinos reales, no a un pie de página estatal. ${ctx.populationLabel}Use el clúster de esta página si está en el borde de ${ctx.zip}.`,
       }),
       (ctx) => ({
-        headline: `Mapa de cobertura de cerrajero ${ctx.zip} en ${ctx.city}, ${ctx.stateId}`,
+        headline: `Cerrajero en ${ctx.city} ${ctx.zip} — mapa de cobertura`,
         support: `${ctx.densityCopy} Los listados adyacentes son el tablero real de ${ctx.stateId} para este rincón de ${countyLabel(ctx)}.`,
       }),
     ],

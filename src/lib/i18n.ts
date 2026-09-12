@@ -124,6 +124,7 @@ type Dictionary = {
   stickyBadges: readonly [string, string, string];
   referralDisclaimer: string;
   tcpaDisclaimer: string;
+  availabilityDisclaimer: string;
   dpsShort: string;
   homeTagline: string;
   homeH1: (year: number) => string;
@@ -173,6 +174,8 @@ export const dictionaries: Record<AppLocale, Dictionary> = {
       "ZipProLink is a free referral matching service that connects homeowners and drivers with independent, licensed local service technicians. ZipProLink does not directly provide locksmith, plumbing, or emergency services, nor does it employ technicians. All service providers are independent contractors responsible for maintaining their own licensing (including TX DPS PSB compliance) and insurance.",
     tcpaDisclaimer:
       "Calls may be recorded for quality and training purposes.",
+    availabilityDisclaimer:
+      "Same-day and 24/7 emergency services are subject to provider participation, location, technician availability, and demand. Availability is not guaranteed and may vary by market and appointment capacity.",
     dpsShort:
       "TX DPS PSB referral matching service — independent contractors; verify license and insurance before work begins.",
     homeTagline: "24/7 Emergency Locksmith Cost & Dispatch · Texas",
@@ -237,12 +240,14 @@ export const dictionaries: Record<AppLocale, Dictionary> = {
     stickyBadges: [
       "Despacho en vivo 24/7",
       "Estimado sin obligación",
-      "Conexión directa con el técnico",
+      "Empareje con técnico con licencia",
     ],
     referralDisclaimer:
-      "ZipProLink is a free referral matching service that connects homeowners and drivers with independent, licensed local service technicians. ZipProLink does not directly provide locksmith, plumbing, or emergency services, nor does it employ technicians. All service providers are independent contractors responsible for maintaining their own licensing (including TX DPS PSB compliance) and insurance.",
+      "ZipProLink es un servicio gratuito de emparejamiento por referido que conecta a propietarios y conductores con técnicos locales independientes y con licencia. ZipProLink no presta directamente servicios de cerrajería, plomería ni emergencias, ni emplea a los técnicos. Todos los proveedores son contratistas independientes responsables de mantener su propia licencia (incluido el cumplimiento TX DPS PSB) y su seguro.",
     tcpaDisclaimer:
-      "Calls may be recorded for quality and training purposes.",
+      "Las llamadas pueden grabarse con fines de calidad y capacitación.",
+    availabilityDisclaimer:
+      "Los servicios el mismo día y de emergencia 24/7 dependen de la participación del proveedor, la ubicación, la disponibilidad del técnico y la demanda. La disponibilidad no está garantizada y puede variar según el mercado y la capacidad de citas.",
     dpsShort:
       "Servicio de referidos TX DPS PSB — contratistas independientes; verifique licencia y seguro antes de iniciar el trabajo.",
     homeTagline: "Costo y despacho de cerrajero de emergencia 24/7 · Texas",
@@ -277,13 +282,13 @@ export const dictionaries: Record<AppLocale, Dictionary> = {
     hotlineBadge: "Línea 24/7",
     headerSubtitle: "Servicios de emergencia para el hogar",
     footerBrand: "ZipProLink · Directorio de cerrajeros de emergencia en Texas",
-    cityHubH1: (year, city, state) =>
-      `${year} Costo de cerrajero y despacho de emergencia 24/7 en ${city}, ${state}`,
+    cityHubH1: (_year, city, state) =>
+      `Cerrajero en ${city}, ${state} — emergencia 24/7 por ZIP`,
     cityHubLead: (city, count) =>
-      `Compare rangos de costo y tiempos de despacho en ${count} códigos ZIP de ${city}. Elija un ZIP para precios locales o llame para un estimado sin obligación.`,
+      `Cerrajero en ${city}: compare rangos de costo y despacho en ${count} ${count === 1 ? "código ZIP" : "códigos ZIP"}. Elija un ZIP para precios locales o llame para un estimado sin obligación.`,
     zipListHeading: "Códigos ZIP con despacho en esta ciudad",
-    countyHubH1: (year, county, state) =>
-      `${year} Costo de cerrajero y despacho de emergencia 24/7 en ${county}, ${state}`,
+    countyHubH1: (_year, county, state) =>
+      `Cerrajero de emergencia en el condado de ${county}, ${state}`,
     countyHubLead: (county, zipCount, cityCount) =>
       `Compare rangos de costo y tiempos de despacho en ${zipCount} códigos ZIP de ${cityCount} ${cityCount === 1 ? "ciudad" : "ciudades"} en ${county}. Elija un ZIP para precios locales o llame para un estimado sin obligación.`,
     countyListHeading: "Ciudades y códigos ZIP con despacho en este condado",

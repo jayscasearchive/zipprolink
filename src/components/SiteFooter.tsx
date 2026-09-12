@@ -1,6 +1,5 @@
 import { CallToAction } from "@/components/CallToAction";
 import { ReferralDisclaimer } from "@/components/ReferralDisclaimer";
-import { AFFILIATE_AVAILABILITY_DISCLAIMER } from "@/lib/constants";
 import { getDictionary, type AppLocale } from "@/lib/i18n";
 import type { ServiceCategory } from "@/lib/types";
 
@@ -23,7 +22,7 @@ export function SiteFooter({
         <div className="border-t border-white/10 pt-5">
           <ReferralDisclaimer locale={locale} tone="dark" />
           <p className="mx-auto mt-4 min-w-0 max-w-4xl text-center text-xs leading-5 text-white/50 wrap-break-word [overflow-wrap:anywhere]">
-            {AFFILIATE_AVAILABILITY_DISCLAIMER}
+            {copy.availabilityDisclaimer}
           </p>
         </div>
       </div>
