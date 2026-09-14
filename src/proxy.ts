@@ -7,6 +7,14 @@ import { directoryPath, toInternalPath } from "@/lib/paths";
 const LEGACY_ZIP = /^\/(?:(en|es)\/)?([a-z0-9-]+)\/(\d{5})\/?$/i;
 const INTERNAL_LOCALE_HEADER = "x-zipprolink-internal-locale";
 
+function normalizedPathname(pathname: string) {
+  try {
+    return decodeURIComponent(pathname).replace(/\/$/, "") || "/";
+  } catch {
+    return pathname.replace(/\/$/, "") || "/";
+  }
+}
+
 function redirectPath(request: NextRequest, pathname: string) {
   const url = request.nextUrl.clone();
   url.pathname = pathname;
@@ -27,6 +35,11 @@ export async function proxy(request: NextRequest) {
   }
 
   const { pathname } = request.nextUrl;
+
+  // Broken inbound `/&` — GSC 404, not a directory page.
+  if (normalizedPathname(pathname) === "/&") {
+    return redirectPath(request, "/");
+  }
 
   const legacy = pathname.match(LEGACY_ZIP);
   if (legacy) {
