@@ -1,23 +1,23 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { DirectoryPage } from "@/components/DirectoryPage";
-import { DirectorySearch } from "@/components/DirectorySearch";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import {
   getDirectoryPageData,
-  getPhaseServices,
   getZipStaticParams,
 } from "@/lib/directory";
-import { getDictionary, getLocalePhone, isAppLocale } from "@/lib/i18n";
+import { isAppLocale } from "@/lib/i18n";
 import { citySlug, directoryPath, parseStateId } from "@/lib/paths";
+import { DirectoryUnavailableError } from "@/lib/query-errors";
 import {
   buildPageJsonLd,
   serializeJsonLd,
 } from "@/lib/schema";
-import { currentPhaseService, isPhaseCoverage } from "@/lib/ssot";
+import { isPhaseCoverage } from "@/lib/ssot";
 import { buildPageVariation, localizePageVariation } from "@/lib/variation";
 
 export const revalidate = 86400;
+export const dynamicParams = false;
 
 type ZipPageProps = {
   params: Promise<{
@@ -41,18 +41,33 @@ export async function generateMetadata({
     return { title: "Not found", robots: { index: false, follow: true } };
   }
 
-  const data = await getDirectoryPageData(service, zip);
-  const phone = getLocalePhone(raw, data?.service);
+  let data;
+  try {
+    data = await getDirectoryPageData(service, zip);
+  } catch (error) {
+    if (error instanceof DirectoryUnavailableError) {
+      throw error;
+    }
+    throw error;
+  }
+
+  if (!data) {
+    notFound();
+  }
+
+  const canonical = directoryPath({
+    locale: raw,
+    service: data.service.slug,
+    state: data.zip.state_id,
+    city: data.zip.city,
+    zip: data.zip.zip_code,
+  });
+
   if (
-    !data ||
     citySlug(data.zip.city) !== city ||
     data.zip.state_id.toLowerCase() !== state.toLowerCase()
   ) {
-    return {
-      title: "Local emergency service not found",
-      description: `We could not find emergency coverage for this ZIP. Call ${phone.display} for live dispatch help.`,
-      robots: { index: false, follow: true },
-    };
+    permanentRedirect(canonical);
   }
 
   const variation = localizePageVariation(
@@ -61,13 +76,6 @@ export async function generateMetadata({
     data.service,
     data.zip,
   );
-  const canonical = directoryPath({
-    locale: raw,
-    service: data.service.slug,
-    state: data.zip.state_id,
-    city: data.zip.city,
-    zip: data.zip.zip_code,
-  });
 
   return {
     title: { absolute: variation.headline },
@@ -123,39 +131,24 @@ export default async function ServiceZipPage({ params }: ZipPageProps) {
     notFound();
   }
 
-  const [data, services] = await Promise.all([
-    getDirectoryPageData(service, zip),
-    getPhaseServices(),
-  ]);
-  const copy = getDictionary(raw);
-  const phone = getLocalePhone(raw, data?.service);
+  const data = await getDirectoryPageData(service, zip);
+  if (!data) {
+    notFound();
+  }
+
+  const canonical = directoryPath({
+    locale: raw,
+    service: data.service.slug,
+    state: data.zip.state_id,
+    city: data.zip.city,
+    zip: data.zip.zip_code,
+  });
 
   if (
-    !data ||
     citySlug(data.zip.city) !== city ||
     data.zip.state_id.toLowerCase() !== state.toLowerCase()
   ) {
-    return (
-      <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-16 sm:px-6">
-        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-emergency">
-          Coverage not found
-        </p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-navy">
-          {copy.coverageMissingTitle}
-        </h1>
-        <p className="mt-3 text-slate-600">
-          {copy.coverageMissingBody(phone.display)}
-        </p>
-        <div className="mt-8">
-          <DirectorySearch
-            locale={raw}
-            services={services}
-            defaultService={currentPhaseService().slug}
-            variant="compact"
-          />
-        </div>
-      </main>
-    );
+    permanentRedirect(canonical);
   }
 
   const variation = localizePageVariation(

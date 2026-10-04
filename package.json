@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "zips:upsert": "node scripts/upsert-zip-codes.mjs",
+    "zips:publish": "node scripts/publish-verified-zips.mjs",
     "neighbors:inspect": "npx --yes tsx scripts/inspect-neighbors.ts",
     "intents:inspect": "npx --yes tsx scripts/inspect-intents.ts"
   },

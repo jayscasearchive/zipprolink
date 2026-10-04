@@ -151,6 +151,7 @@ type Dictionary = {
   countyHubCardMeta: (zipCount: number, cityCount: number, state: string) => string;
   cityCountiesHeading: string;
   breadcrumbHome: string;
+  locationNavLabel: string;
   faqHeading: string;
   faqLead: (zip: string) => string;
   notFoundTitle: string;
@@ -163,7 +164,7 @@ type Dictionary = {
 export const dictionaries: Record<AppLocale, Dictionary> = {
   en: {
     htmlLang: "en",
-    ivr: "Connects in 1-tap: Press 1 for Emergency Lockout / 2 for Commercial. Live dispatchers ready.",
+    ivr: "A live dispatcher answers this line. Menu prompts can vary.",
     callNow: "Call Now",
     stickyBadges: [
       "24/7 Live Dispatch",
@@ -182,29 +183,29 @@ export const dictionaries: Record<AppLocale, Dictionary> = {
     homeH1: (year) =>
       `${year} locksmith cost & 24/7 emergency dispatch in Texas, by ZIP.`,
     homeLead:
-      "Compare typical locksmith cost ranges, then call for a no-obligation estimate. Licensed techs dispatched across Houston, Austin, Dallas, San Antonio, and Texas neighborhoods.",
+      "Compare typical locksmith cost ranges, then call for a no-obligation estimate. Independent technicians are matched when a provider is available across Houston, Austin, Dallas, San Antonio, and other Texas listings.",
     coverageHeading: "Texas locksmith coverage",
     coverageLead: "Phase 1 pilot pages for Texas emergency locksmith dispatch.",
     whyHeading: "Why ZipProLink",
     whyItems: [
       {
-        title: "ZIP-level dispatch",
-        body: "Every page is built around a real US ZIP so you reach a technician who actually covers your block.",
+        title: "ZIP-level pages",
+        body: "Each listing is built around a US ZIP so you can call about that neighborhood. Live technician availability is confirmed when you call.",
       },
       {
         title: "Upfront price ranges",
         body: "See typical emergency pricing before you call. No bait-and-switch trip fees or surprise after-hours markups.",
       },
       {
-        title: "Always on",
-        body: "Nights, weekends, and holidays included. Call the 24/7 hotline and we route the closest available pro.",
+        title: "Always on the line",
+        body: "Call the tracking number for a referral. Same-day and overnight help depend on an independent provider being available.",
       },
     ],
     searchPlaceholder: "Enter Texas ZIP (e.g. 77002)",
     searchButton: "Find Help",
     searchError: "Enter a valid 5-digit US ZIP code.",
     openPage: "Open page",
-    licensedLine: "Licensed · Insured · Available nights, weekends, and holidays",
+    licensedLine: "Referral matching · independent technicians · on-site estimates when a provider is available",
     hotlineBadge: "24/7 Hotline",
     headerSubtitle: "Emergency Home Services",
     footerBrand: "ZipProLink · Texas Emergency Locksmith Directory",
@@ -212,17 +213,18 @@ export const dictionaries: Record<AppLocale, Dictionary> = {
       `${year} Locksmith Cost & 24/7 Emergency Dispatch in ${city}, ${state}`,
     cityHubLead: (city, count) =>
       `Compare locksmith cost ranges and live dispatch windows across ${count} ZIP codes in ${city}. Tap a ZIP for local pricing, or call for a no-obligation estimate.`,
-    zipListHeading: "ZIP codes we dispatch in this city",
+    zipListHeading: "ZIP codes listed in this city",
     countyHubH1: (year, county, state) =>
       `${year} Locksmith Cost & 24/7 Emergency Dispatch in ${county}, ${state}`,
     countyHubLead: (county, zipCount, cityCount) =>
       `Compare locksmith cost ranges and live dispatch windows across ${zipCount} ZIP codes in ${cityCount} ${cityCount === 1 ? "city" : "cities"} in ${county}. Tap a ZIP for local pricing, or call for a no-obligation estimate.`,
-    countyListHeading: "Cities and ZIP codes we dispatch in this county",
+    countyListHeading: "Cities and ZIP codes listed in this county",
     countyHubsHeading: "Counties with live listings",
     countyHubCardMeta: (zipCount, cityCount, state) =>
       `${zipCount} ZIP · ${cityCount} ${cityCount === 1 ? "city" : "cities"} · ${state}`,
     cityCountiesHeading: "Counties that include this city",
     breadcrumbHome: "Home",
+    locationNavLabel: "City and county pages",
     faqHeading: "Frequently asked questions",
     faqLead: (zip) => `Questions hashed to ${zip} — not a statewide FAQ clone.`,
     notFoundTitle: "Page not found",
@@ -235,7 +237,7 @@ export const dictionaries: Record<AppLocale, Dictionary> = {
   },
   es: {
     htmlLang: "es",
-    ivr: "Conexión directa: Presione 1 para cerrajería de emergencia. Operadores listos.",
+    ivr: "Una persona en vivo atiende esta línea. El menú puede variar.",
     callNow: "Llamar ahora",
     stickyBadges: [
       "Despacho en vivo 24/7",
@@ -254,23 +256,23 @@ export const dictionaries: Record<AppLocale, Dictionary> = {
     homeH1: (year) =>
       `${year} costo de cerrajero y despacho de emergencia 24/7 en Texas, por ZIP.`,
     homeLead:
-      "Compare rangos de costo de cerrajero y llame para un estimado sin obligación. Técnicos con licencia en Houston, Austin, Dallas, San Antonio y vecindarios de Texas.",
+      "Compare rangos de costo de cerrajero y llame para un estimado sin obligación. Se empareja con técnicos independientes cuando hay un proveedor disponible en Houston, Austin, Dallas, San Antonio y otros listados de Texas.",
     coverageHeading: "Cobertura de cerrajeros en Texas",
     coverageLead:
       "Páginas piloto de la fase 1 para despacho de cerrajeros de emergencia en Texas.",
     whyHeading: "Por qué ZipProLink",
     whyItems: [
       {
-        title: "Despacho por ZIP",
-        body: "Cada página está construida alrededor de un ZIP real de EE. UU. para conectar con un técnico que cubre su zona.",
+        title: "Páginas por ZIP",
+        body: "Cada listado está construido alrededor de un ZIP de EE. UU. para llamar por ese vecindario. La disponibilidad del técnico se confirma al llamar.",
       },
       {
         title: "Rangos de precio por adelantado",
         body: "Vea precios de emergencia típicos antes de llamar. Sin cargos ocultos ni recargos sorpresa.",
       },
       {
-        title: "Siempre disponible",
-        body: "Noches, fines de semana y feriados incluidos. Llame a la línea 24/7 y asignamos al profesional más cercano.",
+        title: "Línea disponible",
+        body: "Llame al número de seguimiento para un referido. La ayuda el mismo día o de madrugada depende de que un proveedor independiente esté disponible.",
       },
     ],
     searchPlaceholder: "Ingrese un ZIP de Texas (p. ej. 77002)",
@@ -278,7 +280,7 @@ export const dictionaries: Record<AppLocale, Dictionary> = {
     searchError: "Ingrese un código postal de EE. UU. de 5 dígitos.",
     openPage: "Abrir página",
     licensedLine:
-      "Con licencia · Asegurado · Disponible noches, fines de semana y feriados",
+      "Emparejamiento por referido · técnicos independientes · estimados en sitio cuando hay un proveedor disponible",
     hotlineBadge: "Línea 24/7",
     headerSubtitle: "Servicios de emergencia para el hogar",
     footerBrand: "ZipProLink · Directorio de cerrajeros de emergencia en Texas",
@@ -286,17 +288,18 @@ export const dictionaries: Record<AppLocale, Dictionary> = {
       `Cerrajero en ${city}, ${state} — emergencia 24/7 por ZIP`,
     cityHubLead: (city, count) =>
       `Cerrajero en ${city}: compare rangos de costo y despacho en ${count} ${count === 1 ? "código ZIP" : "códigos ZIP"}. Elija un ZIP para precios locales o llame para un estimado sin obligación.`,
-    zipListHeading: "Códigos ZIP con despacho en esta ciudad",
+    zipListHeading: "Códigos ZIP listados en esta ciudad",
     countyHubH1: (_year, county, state) =>
       `Cerrajero de emergencia en el condado de ${county}, ${state}`,
     countyHubLead: (county, zipCount, cityCount) =>
       `Compare rangos de costo y tiempos de despacho en ${zipCount} códigos ZIP de ${cityCount} ${cityCount === 1 ? "ciudad" : "ciudades"} en ${county}. Elija un ZIP para precios locales o llame para un estimado sin obligación.`,
-    countyListHeading: "Ciudades y códigos ZIP con despacho en este condado",
+    countyListHeading: "Ciudades y códigos ZIP listados en este condado",
     countyHubsHeading: "Condados con listados en vivo",
     countyHubCardMeta: (zipCount, cityCount, state) =>
       `${zipCount} ZIP · ${cityCount} ${cityCount === 1 ? "ciudad" : "ciudades"} · ${state}`,
     cityCountiesHeading: "Condados que incluyen esta ciudad",
     breadcrumbHome: "Inicio",
+    locationNavLabel: "Páginas de ciudad y condado",
     faqHeading: "Preguntas frecuentes",
     faqLead: (zip) =>
       `Preguntas asociadas al ZIP ${zip}, no un FAQ genérico estatal.`,

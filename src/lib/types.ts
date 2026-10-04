@@ -34,8 +34,15 @@ export type FaqItem = {
   answer: string;
 };
 
+export type DirectoryCoverage = {
+  status: "serviceable" | "geo_only";
+  source: "service_coverage" | "zip_codes";
+  verified: boolean;
+};
+
 export type DirectoryPageData = {
   zip: ZipCode;
   service: ServiceCategory;
   neighbors: NeighborZip[];
+  coverage: DirectoryCoverage;
 };

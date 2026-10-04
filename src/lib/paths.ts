@@ -169,3 +169,53 @@ export function toInternalPath(pathname: string) {
   rest = injectCurrentService(rest);
   return joinPath([locale, ...rest]);
 }
+
+/** Public URL after injecting the current service slug. Default locale has no `/en`. */
+export function toPublicPath(pathname: string) {
+  const segments = pathname.split("/").filter(Boolean);
+  let locale: AppLocale = DEFAULT_LOCALE;
+  let rest = segments;
+
+  const maybeLocale = segments[0]?.toLowerCase();
+  if (isAppLocale(maybeLocale)) {
+    locale = maybeLocale;
+    rest = segments.slice(1);
+  }
+
+  rest = injectCurrentService(rest);
+  if (locale === DEFAULT_LOCALE) {
+    return joinPath(rest);
+  }
+  return joinPath([locale, ...rest]);
+}
+
+/** Shortcut like `/tx/houston/77002` → `/locksmith/tx/houston/77002`. */
+export function shortcutRedirectTarget(pathname: string) {
+  const normalized = pathname.replace(/\/$/, "") || "/";
+  if (normalized === "/") {
+    return null;
+  }
+  const publicPath = toPublicPath(normalized);
+  return publicPath !== normalized ? publicPath : null;
+}
+
+const DIRECTORY_ZIP =
+  /^\/(?:(es)\/)?(?:locksmith\/)?([a-z]{2})\/([a-z0-9-]+)\/(\d{5})\/?$/i;
+
+export function parseDirectoryZipPath(pathname: string) {
+  const match = pathname.match(DIRECTORY_ZIP);
+  if (!match) {
+    return null;
+  }
+
+  const locale: AppLocale = match[1] === "es" ? "es" : DEFAULT_LOCALE;
+  const state = match[2]?.toLowerCase() ?? "";
+  const city = match[3]?.toLowerCase() ?? "";
+  const zip = match[4] ?? "";
+
+  if (!isPhaseStateSlug(state) || city === COUNTY_SEGMENT) {
+    return null;
+  }
+
+  return { locale, state, city, zip };
+}

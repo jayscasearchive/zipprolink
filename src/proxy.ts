@@ -2,7 +2,14 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { resolveCoverageLocation } from "@/lib/directory";
 import { DEFAULT_LOCALE, isAppLocale } from "@/lib/i18n";
-import { directoryPath, toInternalPath } from "@/lib/paths";
+import { DirectoryUnavailableError } from "@/lib/query-errors";
+import {
+  directoryPath,
+  parseDirectoryZipPath,
+  shortcutRedirectTarget,
+  toInternalPath,
+} from "@/lib/paths";
+import { currentPhaseService } from "@/lib/ssot";
 
 const LEGACY_ZIP = /^\/(?:(en|es)\/)?([a-z0-9-]+)\/(\d{5})\/?$/i;
 const INTERNAL_LOCALE_HEADER = "x-zipprolink-internal-locale";
@@ -47,17 +54,23 @@ export async function proxy(request: NextRequest) {
     const locale = isAppLocale(rawLocale) ? rawLocale : DEFAULT_LOCALE;
     const service = legacy[2]?.toLowerCase() ?? "";
     const zip = legacy[3] ?? "";
-    const data = await resolveCoverageLocation(service, zip);
-    if (data) {
-      const target = directoryPath({
-        locale,
-        service: data.service.slug,
-        state: data.zip.state_id,
-        city: data.zip.city,
-        zip: data.zip.zip_code,
-      });
-      if (pathname.replace(/\/$/, "") !== target) {
-        return redirectPath(request, target);
+    try {
+      const data = await resolveCoverageLocation(service, zip);
+      if (data) {
+        const target = directoryPath({
+          locale,
+          service: data.service.slug,
+          state: data.zip.state_id,
+          city: data.zip.city,
+          zip: data.zip.zip_code,
+        });
+        if (pathname.replace(/\/$/, "") !== target) {
+          return redirectPath(request, target);
+        }
+      }
+    } catch (error) {
+      if (!(error instanceof DirectoryUnavailableError)) {
+        throw error;
       }
     }
   }
@@ -68,6 +81,42 @@ export async function proxy(request: NextRequest) {
   if (first === DEFAULT_LOCALE) {
     const rest = pathname.replace(/^\/en(?=\/|$)/i, "") || "/";
     return redirectPath(request, rest);
+  }
+
+  const directoryZip = parseDirectoryZipPath(normalizedPathname(pathname));
+  if (directoryZip) {
+    try {
+      const data = await resolveCoverageLocation(
+        currentPhaseService().slug,
+        directoryZip.zip,
+      );
+      if (data) {
+        const target = directoryPath({
+          locale: directoryZip.locale,
+          service: data.service.slug,
+          state: data.zip.state_id,
+          city: data.zip.city,
+          zip: data.zip.zip_code,
+        });
+        if (normalizedPathname(pathname) !== target) {
+          return redirectPath(request, target);
+        }
+      } else {
+        const missing = request.nextUrl.clone();
+        missing.pathname = "/_not-found";
+        return NextResponse.rewrite(missing, { status: 404 });
+      }
+    } catch (error) {
+      if (!(error instanceof DirectoryUnavailableError)) {
+        throw error;
+      }
+      // DB outage: do not 308 to the wrong place or invent coverage-missing.
+    }
+  }
+
+  const shortcut = shortcutRedirectTarget(pathname);
+  if (shortcut) {
+    return redirectPath(request, shortcut);
   }
 
   const internal = toInternalPath(pathname);

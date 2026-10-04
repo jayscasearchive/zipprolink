@@ -1,4 +1,5 @@
 import { Phone } from "lucide-react";
+import { CallClickLink } from "@/components/CallClickLink";
 import { ReferralDisclaimer } from "@/components/ReferralDisclaimer";
 import {
   getDictionary,
@@ -47,9 +48,12 @@ export function CallToAction({
           {copy.ivr}
         </p>
       ) : null}
-      <a
+      <CallClickLink
         href={phone.tel}
-        aria-label={`${copy.callNow} ${phone.display}`}
+        locale={locale}
+        placement={variant}
+        serviceSlug={service?.slug}
+        ariaLabel={`${copy.callNow} ${phone.display}`}
         className={buttonClass}
       >
         <Phone className={isHeader || isFooter || isSticky ? "h-4 w-4 shrink-0" : "h-5 w-5 shrink-0"} aria-hidden />
@@ -69,7 +73,7 @@ export function CallToAction({
             {copy.callNow} · {phone.display}
           </>
         )}
-      </a>
+      </CallClickLink>
       {showLegal ? (
         <div className="mt-2 min-w-0 max-w-full">
           <ReferralDisclaimer locale={locale} compact tone="muted" />

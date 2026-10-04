@@ -3,14 +3,14 @@ import type { AppLocale } from "@/lib/i18n";
 
 const BADGES = {
   en: [
-    { label: "Licensed", icon: BadgeCheck },
-    { label: "Insured", icon: Shield },
+    { label: "Independent Pros", icon: BadgeCheck },
+    { label: "Insured Providers", icon: Shield },
     { label: "Upfront Estimates", icon: FileCheck2 },
     { label: "No Hidden Fees", icon: Wallet },
   ],
   es: [
-    { label: "Con licencia", icon: BadgeCheck },
-    { label: "Asegurado", icon: Shield },
+    { label: "Técnicos independientes", icon: BadgeCheck },
+    { label: "Proveedores asegurados", icon: Shield },
     { label: "Estimados por adelantado", icon: FileCheck2 },
     { label: "Sin cargos ocultos", icon: Wallet },
   ],

@@ -1,21 +1,20 @@
-import { HOTLINE_DISPLAY } from "@/lib/constants";
 import { currentSeoYear } from "@/lib/content";
 import type { CopyContext, IntentPack } from "@/lib/variation/pools";
 import type { DensityBand, LayoutId, PageChrome, PricingTableLabels } from "@/lib/variation/types";
 
 export const PAGE_CHROME_ES: PageChrome = {
-  asideDispatch: "Despacho promedio",
-  asideZip: "ZIP de cobertura",
+  asideDispatch: "Objetivo típico de despacho",
+  asideZip: "Este ZIP",
   asideArea: "Tipo de zona",
 };
 
 export const PRICING_TABLE_ES: PricingTableLabels = {
   service: "Servicio",
-  cost: "Rango de costo",
-  dispatch: "Tiempo de despacho",
+  cost: "Rango de catálogo",
+  dispatch: "Objetivo de despacho",
   note: "Nota local",
   disclaimer:
-    "Los rangos son estimados para este ZIP. El técnico confirma la cotización en sitio antes de iniciar el trabajo.",
+    "Los precios por trabajo son un catálogo compartido, no un estudio de este ZIP. La densidad no inventa una tarifa local. El técnico confirma la cotización en sitio. Los tiempos de despacho son objetivos típicos del listado, no una llegada garantizada.",
 };
 
 export function densityLabelEs(band: DensityBand) {
@@ -39,7 +38,7 @@ export const ES_INTENTS: Record<LayoutId, IntentPack> = {
     hooks: [
       (ctx) => ({
         headline: `Cerrajero de emergencia en ${ctx.city} ${ctx.zip} — 24 horas`,
-        support: `¿Se quedó fuera de casa, auto u oficina en ${ctx.place}? Llame al ${HOTLINE_DISPLAY}. Un técnico con licencia suele salir en unos ${ctx.responseTime}. Usted aprueba el estimado en sitio antes de cualquier trabajo.`,
+        support: `¿Se quedó fuera de casa, auto u oficina en ${ctx.place}? Llame al ${ctx.phoneDisplay}. Podemos conectarle con un cerrajero independiente cuando haya uno disponible. Ventana típica del listado: ${ctx.responseTime}. Usted aprueba el estimado en sitio antes de cualquier trabajo.`,
       }),
       (ctx) => ({
         headline: `¿Se quedó fuera en ${ctx.city}? Cerrajero de emergencia ${ctx.zip}`,
@@ -58,7 +57,7 @@ export const ES_INTENTS: Record<LayoutId, IntentPack> = {
     }),
     aside: (ctx) => ({
       title: "Ventana de emergencia",
-      body: `Los cierres en ${ctx.zip} suelen resolverse en ${ctx.responseTime}. Llame al ${HOTLINE_DISPLAY} con el edificio o la subdivisión exactos.`,
+      body: `Los cierres en ${ctx.zip} suelen resolverse en ${ctx.responseTime}. Llame al ${ctx.phoneDisplay} con el edificio o la subdivisión exactos.`,
       metric: ctx.responseTime,
       metricLabel: "Llegada típica",
     }),
@@ -74,7 +73,7 @@ export const ES_INTENTS: Record<LayoutId, IntentPack> = {
     }),
     process: (ctx) => ({
       heading: `Cómo funciona el despacho de emergencia en ${ctx.zip}`,
-      intro: `Tres pasos y un técnico con licencia se mueve hacia ${ctx.place}. Llame al ${HOTLINE_DISPLAY}.`,
+      intro: `Tres pasos y luego intentamos emparejar un técnico independiente para ${ctx.place}. Llame al ${ctx.phoneDisplay}.`,
       steps: [
         {
           step: 1,
@@ -104,7 +103,7 @@ export const ES_INTENTS: Record<LayoutId, IntentPack> = {
     requiredFaqs: (ctx) => [
       {
         question: `¿Qué tan rápido puede llegar un cerrajero a ${ctx.place} en una emergencia?`,
-        answer: `El despacho promedio para ${ctx.zip} es ${ctx.responseTime}. Las llamadas ${ctx.densityBand === "urban" ? "de centro y torres" : "de entrada suburbana"} se asignan a técnicos que ya están en ${countyLabel(ctx)}. Llame al ${HOTLINE_DISPLAY} con el edificio o el cruce exacto.`,
+        answer: `El objetivo de despacho listado para este servicio es ${ctx.responseTime}. No es un promedio medido de ${ctx.zip}. Las llamadas ${ctx.densityBand === "urban" ? "de centro y torres" : "de entrada suburbana"} se refieren a técnicos independientes cuando hay uno disponible en ${countyLabel(ctx)}. Llame al ${ctx.phoneDisplay} con el edificio o el cruce exacto.`,
       },
       {
         question: `¿Qué debo hacer mientras espero al cerrajero en ${ctx.zip}?`,
@@ -145,7 +144,7 @@ export const ES_INTENTS: Record<LayoutId, IntentPack> = {
     faqLead: (ctx) =>
       `Respuestas centradas en despacho para ${ctx.place}. Costo y licencia siguen más abajo; este bloque se queda en el tiempo de llegada.`,
     meta: (ctx) =>
-      `Cerrajero de emergencia en ${ctx.city} ${ctx.zip}. Llegada típica ${ctx.responseTime}. Llame al ${HOTLINE_DISPLAY}.`.slice(
+      `Cerrajero de emergencia en ${ctx.city} ${ctx.zip}. Llegada típica ${ctx.responseTime}. Llame al ${ctx.phoneDisplay}.`.slice(
         0,
         160,
       ),
@@ -169,7 +168,7 @@ export const ES_INTENTS: Record<LayoutId, IntentPack> = {
     intro: (ctx) => ({
       heading: `Cuánto cuesta el trabajo de cerrajero de emergencia en ${ctx.zip}`,
       paragraphs: [
-        `Quien llama en ${ctx.city} quiere el número antes de que salga la camioneta. En ${ctx.place}, el trabajo típico de emergencia cae en ${ctx.priceRange}, con llegada alrededor de ${ctx.responseTime}. La densidad cambia estacionamiento y manejo — la tabla parte trabajos comunes para que ${ctx.zip} no herede un promedio estatal genérico.`,
+        `Quien llama en ${ctx.city} quiere el número antes de que salga nadie. En ${ctx.place}, el listado usa ${ctx.priceRange} como banda de planificación, con un objetivo típico de despacho de ${ctx.responseTime}. La densidad aquí afecta estacionamiento y manejo en el texto, no una tarifa local. Las filas de trabajo son un catálogo compartido para que ${ctx.zip} no se trate como un estudio local.`,
         `Nada en esta página es una oferta vinculante. Los cerrajeros de Texas confirman el cilindro, el vehículo o el local en sitio. Usted aprueba el estimado antes de taladrar, cambiar la combinación o reemplazar herraje.`,
       ],
       checklistHeading: `Tipos de trabajo con precio para las noches de ${ctx.city}`,
@@ -265,7 +264,7 @@ export const ES_INTENTS: Record<LayoutId, IntentPack> = {
     faqLead: (ctx) =>
       `Respuestas centradas en precio para ${ctx.place}. El despacho y la licencia siguen aplicando; este bloque se queda en lo que paga.`,
     meta: (ctx) =>
-      `Cerrajero en ${ctx.city} ${ctx.zip}: rango típico ${ctx.priceRange}. Despacho unos ${ctx.responseTime}. Llame al ${HOTLINE_DISPLAY}.`.slice(
+      `Cerrajero en ${ctx.city} ${ctx.zip}: rango típico ${ctx.priceRange}. Despacho unos ${ctx.responseTime}. Llame al ${ctx.phoneDisplay}.`.slice(
         0,
         160,
       ),
@@ -355,7 +354,7 @@ export const ES_INTENTS: Record<LayoutId, IntentPack> = {
     extraFaqs: (ctx) => [
       {
         question: `¿Y si el técnico que llega no puede mostrar licencia en ${ctx.city}?`,
-        answer: `No autorice taladro ni rekey. Llame al ${HOTLINE_DISPLAY} para reasignar una empresa que pueda servir legalmente ${ctx.zip}.`,
+        answer: `No autorice taladro ni rekey. Llame al ${ctx.phoneDisplay} para reasignar una empresa que pueda servir legalmente ${ctx.zip}.`,
       },
       {
         question: `¿Un cerrajero más barato sin licencia ahorra dinero en ${ctx.zip}?`,
@@ -382,7 +381,7 @@ export const ES_INTENTS: Record<LayoutId, IntentPack> = {
     faqLead: (ctx) =>
       `Respuestas centradas en TX DPS para ${ctx.place}. Precio y llegada siguen importando; este bloque se queda en quién es legal enviar.`,
     meta: (ctx) =>
-      `Cerrajero con licencia en ${ctx.city}, ${ctx.stateId} ${ctx.zip}. Enrutamiento TX DPS para ${countyLabel(ctx)}. Llame al ${HOTLINE_DISPLAY}.`.slice(
+      `Referido de cerrajero en ${ctx.city}, ${ctx.stateId} ${ctx.zip}. Enrutamiento TX DPS para ${countyLabel(ctx)}. Llame al ${ctx.phoneDisplay}.`.slice(
         0,
         160,
       ),

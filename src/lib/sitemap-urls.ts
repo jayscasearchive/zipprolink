@@ -7,26 +7,39 @@ import {
 import { LOCALES } from "@/lib/i18n";
 import { countyPath, directoryPath, localeHomePath } from "@/lib/paths";
 
-export async function getSitemapUrlList() {
+export type SitemapEntry = {
+  url: string;
+};
+
+function sitemapAbsoluteUrl(path: string) {
+  if (!path || path === "/") {
+    return SITE_URL;
+  }
+  return `${SITE_URL}${path}`;
+}
+
+export async function getSitemapUrlList(): Promise<SitemapEntry[]> {
   const [zips, hubs, counties] = await Promise.all([
     getZipStaticParams(),
     getCityStaticParams(),
     getCountyStaticParams(),
   ]);
 
-  const urls = LOCALES.map((locale) => `${SITE_URL}${localeHomePath(locale)}`);
+  const entries: SitemapEntry[] = LOCALES.map((locale) => ({
+    url: sitemapAbsoluteUrl(localeHomePath(locale)),
+  }));
 
   for (const hub of hubs) {
-    urls.push(`${SITE_URL}${directoryPath(hub)}`);
+    entries.push({ url: sitemapAbsoluteUrl(directoryPath(hub)) });
   }
 
   for (const county of counties) {
-    urls.push(`${SITE_URL}${countyPath(county)}`);
+    entries.push({ url: sitemapAbsoluteUrl(countyPath(county)) });
   }
 
   for (const zip of zips) {
-    urls.push(`${SITE_URL}${directoryPath(zip)}`);
+    entries.push({ url: sitemapAbsoluteUrl(directoryPath(zip)) });
   }
 
-  return urls;
+  return entries;
 }

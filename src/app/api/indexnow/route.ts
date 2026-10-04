@@ -8,7 +8,8 @@ import {
 import { getSitemapUrlList } from "@/lib/sitemap-urls";
 
 async function submitIndexNow() {
-  const urlList = await getSitemapUrlList();
+  const entries = await getSitemapUrlList();
+  const urlList = entries.map((entry) => entry.url);
   const host = new URL(SITE_URL).host;
   const payload = {
     host,

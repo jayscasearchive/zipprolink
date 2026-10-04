@@ -12,6 +12,15 @@ import {
   hasCountyName,
   parseStateId,
 } from "@/lib/paths";
+import {
+  resolvePublishedCoverage,
+  type CoverageRecord,
+} from "@/lib/coverage";
+import {
+  DirectoryUnavailableError,
+  isMissingColumnError,
+  isMissingRelationError,
+} from "@/lib/query-errors";
 import { currentPhaseService, isPhaseCoverage } from "@/lib/ssot";
 import { supabase } from "@/lib/supabase";
 import type {
@@ -23,7 +32,12 @@ import type {
 
 export type CoverageZip = Pick<
   ZipCode,
-  "zip_code" | "city" | "county_name" | "state_id" | "state_name"
+  | "zip_code"
+  | "city"
+  | "county_name"
+  | "state_id"
+  | "state_name"
+  | "created_at"
 >;
 
 export type ZipStaticParam = {
@@ -77,6 +91,10 @@ export async function getServiceBySlug(
     return withDid.data;
   }
 
+  if (!isMissingColumnError(withDid.error)) {
+    throw new DirectoryUnavailableError(withDid.error.message);
+  }
+
   const { data, error } = await supabase
     .from("service_categories")
     .select(SERVICE_SELECT_BASE)
@@ -85,8 +103,7 @@ export async function getServiceBySlug(
     .maybeSingle();
 
   if (error) {
-    console.error("service_categories lookup failed", error.message);
-    return null;
+    throw new DirectoryUnavailableError(error.message);
   }
 
   return data;
@@ -102,8 +119,7 @@ export async function getZipCode(zipCode: string): Promise<ZipCode | null> {
     .maybeSingle();
 
   if (error) {
-    console.error("zip_codes lookup failed", error.message);
-    return null;
+    throw new DirectoryUnavailableError(error.message);
   }
 
   return data;
@@ -170,18 +186,54 @@ export async function getPhaseCoverageZips(): Promise<CoverageZip[]> {
   const service = currentPhaseService();
   const { data: zips, error } = await supabase
     .from("zip_codes")
-    .select("zip_code, city, county_name, state_id, state_name")
+    .select("zip_code, city, county_name, state_id, state_name, created_at")
     .order("zip_code", { ascending: true });
 
   if (error) {
-    console.error("phase coverage zip lookup failed", error.message);
-    return [];
+    throw new DirectoryUnavailableError(error.message);
   }
 
   return (zips ?? []).filter((zip) =>
     isPhaseCoverage(service.slug, zip.state_id),
   );
 }
+
+let coverageTableMissing = false;
+
+export const getServiceCoverageIndex = cache(async function getServiceCoverageIndex(
+  serviceSlug: string,
+): Promise<Map<string, CoverageRecord> | null> {
+  if (coverageTableMissing) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from("service_coverage")
+    .select("zip_code, status, source, verified_at")
+    .eq("service_slug", serviceSlug);
+
+  if (error) {
+    if (isMissingRelationError(error)) {
+      coverageTableMissing = true;
+      return null;
+    }
+    // Unreadable table (RLS, grants, outage) must not 404/noindex live ZIPs.
+    console.error("service_coverage read skipped", error.message);
+    return null;
+  }
+
+  const index = new Map<string, CoverageRecord>();
+  for (const row of data ?? []) {
+    if (
+      row.status === "active" ||
+      row.status === "paused" ||
+      row.status === "blocked"
+    ) {
+      index.set(row.zip_code, row);
+    }
+  }
+  return index;
+});
 
 export async function getZipStaticParams(): Promise<ZipStaticParam[]> {
   const service = currentPhaseService();
@@ -439,9 +491,17 @@ export const getDirectoryPageData = cache(async function getDirectoryPageData(
     return null;
   }
 
-  const neighbors = await getNeighboringZips(zip);
+  const [neighbors, coverageIndex] = await Promise.all([
+    getNeighboringZips(zip),
+    getServiceCoverageIndex(service.slug),
+  ]);
 
-  return { service, zip, neighbors };
+  return {
+    service,
+    zip,
+    neighbors,
+    coverage: resolvePublishedCoverage(zip.zip_code, coverageIndex),
+  };
 });
 
 export async function getActiveServices(): Promise<
@@ -454,8 +514,7 @@ export async function getActiveServices(): Promise<
     .order("slug", { ascending: true });
 
   if (error) {
-    console.error("service_categories list failed", error.message);
-    return [];
+    throw new DirectoryUnavailableError(error.message);
   }
 
   return data ?? [];

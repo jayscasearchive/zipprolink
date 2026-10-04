@@ -6,7 +6,7 @@ Handoff document for another AI reading this repo for the first time.
 
 **Last verified against the repo:** 2026-10-04  
 **Repo:** `https://github.com/jayscasearchive/zipprolink.git`  
-**Latest app commit at write time:** `760783c` (`fix(seo): 308 stray /& URL to homepage for GSC 404`)
+**Latest app commit at write time:** local working tree (call measurement, HTTP policy, referral schema; not yet committed)
 
 ---
 
@@ -28,7 +28,7 @@ Business source of truth (also in `.cursor/rules/zipprolink-ssot.mdc` and `src/l
 - ZIP search that resolves coverage via `/api/directory/lookup` and routes to the canonical ZIP URL
 - Deterministic per-ZIP copy variation (4 intents × EN/ES packs)
 - Neighbor ZIP mesh (Haversine, 10 miles, optional same-city/county ≤25 miles)
-- JSON-LD (`EmergencyService`, FAQ, breadcrumb), canonical, hreflang, sitemap, robots
+- JSON-LD (`Organization` + `Service`, FAQ, breadcrumb), canonical, hreflang, sitemap, robots
 - Call CTAs (`tel:`) + mobile sticky call bar
 - TX DPS / referral / TCPA / availability disclaimers
 - IndexNow submit endpoint
@@ -45,7 +45,7 @@ Business source of truth (also in `.cursor/rules/zipprolink-ssot.mdc` and `src/l
 | Fonts | `next/font` Geist / Geist Mono |
 | Lint | ESLint 9 + `eslint-config-next` 16.3.1 |
 
-There is **no** Google Analytics, GTM, or other analytics package in source.
+There is **no** Google Analytics or GTM package. Phone clicks POST `/api/telemetry/call-click` (path, ZIP, locale, placement). That event is **not** a billed conversion.
 
 ### Deploy
 
@@ -75,7 +75,7 @@ Upsert scripts also require `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`.
 
 1. Build/runtime loads phase TX locksmith ZIPs from Supabase.
 2. `generateStaticParams` emits EN+ES params for each ZIP, each city that has ≥1 ZIP, and each county that has ≥1 ZIP.
-3. `src/proxy.ts` maps public URLs onto the internal `/[locale]/...` tree, 308s `/en/...` to unprefixed English, 308s `/&` to `/`, 308s legacy `/locksmith/12345` style paths when resolvable, and **rewrites** (200) shortcuts like `/tx/houston/77005` to the internal ZIP page.
+3. `src/proxy.ts` maps public URLs onto the internal `/[locale]/...` tree, 308s `/en/...` to unprefixed English, 308s `/&` to `/`, 308s legacy `/locksmith/12345` style paths when resolvable, **308s** shortcuts like `/tx/houston/77002` to `/locksmith/tx/houston/77002`, 308s a known ZIP under the wrong city slug to the correct city, and **rewrites** (200) only the canonical public path onto the locale tree.
 4. ZIP pages hash `(zip, service)` to pick an intent layout and interpolate city/ZIP/county/price/response into templates.
 5. CTAs dial a MarketCall-style tracking DID via `tel:`.
 6. Sitemap lists locale homes + city hubs + county hubs + ZIP URLs. Robots allow `/` and point at sitemap.
@@ -158,7 +158,7 @@ Public English URLs **omit** `/en` (`localePrefix: as-needed`). Spanish uses `/e
 | `/es/locksmith/tx/{city}` | same | City hub (ES) |
 | `/locksmith/tx/county/{county}` | `county/[county]/page.tsx` | County hub; `county` segment avoids city slug collisions |
 | `/es/locksmith/tx/county/{county}` | same | |
-| `/tx/{city}/{zip}` | rewritten to internal EN ZIP page | **200 rewrite**, not 308 |
+| `/tx/{city}/{zip}` | 308 to `/locksmith/tx/{city}/{zip}` | Canonical shortcut; wrong city also 308s to the ZIP’s real city |
 | `/en/...` | 308 to the same path without `/en` | `proxy.ts` |
 | `/&` or `/%26` | 308 to `/` | GSC junk URL |
 | Legacy `/locksmith/{zip}` (5-digit) | 308 to canonical directory path if coverage exists | `LEGACY_ZIP` in `proxy.ts` |
@@ -202,17 +202,17 @@ JSON batches use the same fields. Upsert conflict target: `zip_code`.
 1. `getZipStaticParams()` builds `{ locale, service, state, city, zip }` for every phase ZIP × `en`/`es`.
 2. Page: `src/app/[locale]/[service]/[state]/[city]/[zip]/page.tsx`
 3. `getDirectoryPageData(service, zip)` (React `cache`) loads service + ZIP + neighbors.
-4. If the ZIP is missing from coverage, or the city/state slug does not match the ZIP row → coverage-missing UI + `robots: noindex` in metadata. That HTML is **HTTP 200**, not JSON 404 and not `notFound()`. `notFound()` only when locale/phase is invalid.
-5. `buildPageVariation` then `localizePageVariation` for ES.
-6. Render `DirectoryPage` + JSON-LD.
+4. If the ZIP row is missing → HTTP **404** (`notFound()`), with noindex metadata. If the ZIP exists but the city/state slug is wrong → **308** to the canonical city path. `notFound()` also when locale/phase is invalid. A DB outage throws `DirectoryUnavailableError` (do not render coverage-missing).
+5. `buildPageVariation` then `localizePageVariation` for ES. Copy interpolates `getLocalePhone` via `ctx.phoneDisplay`.
+6. Render `DirectoryPage` + JSON-LD (Organization + Service, not a ZIP storefront).
 
 ### Static vs dynamic
 
 - **SSG** via `generateStaticParams` (build log historically ~283 routes including homes/hubs/ZIPs; recount at next build).
 - **ISR:** `export const revalidate = 86400` (24h) on ZIP, city, county, home, locale layout, sitemap.
-- Lookup API is dynamic (`ƒ`).
-- Unknown / out-of-coverage ZIP **page**: HTTP **200** + in-page coverage-missing UI + noindex meta (not JSON 404).
-- Lookup API only: `GET /api/directory/lookup` returns **JSON 404** `{ error: "ZIP not in coverage" }` when the ZIP is not in phase coverage; JSON 400 for invalid ZIP format.
+- Lookup API is dynamic (`ƒ`). JSON **404** if the ZIP is not in phase geography; JSON **503** if the directory DB is down.
+- Unknown ZIP **page**: HTTP **404** (`notFound()` + noindex metadata).
+- Wrong city/state slug for a known ZIP: HTTP **308** to the canonical path.
 
 ### What differs per ZIP
 
@@ -222,8 +222,8 @@ Unique (data-driven):
 - Neighbor list (distance mesh)
 - Hashed **intent** (`emergency` | `compliance` | `neighborhood` | `cost`) → section order, hero panel, which headline variant
 - Interpolated strings (H1, FAQ, meta, DPS, jobs table notes)
-- Urban vs suburban copy (`density >= 5000` → urban)
-- Urban job prices get a 1.08 multiplier
+- Urban vs suburban **copy** (`density >= 5000` → urban). Density is **not** used to lift prices.
+- Job catalog amounts are shared (no per-ZIP 1.08 multiplier)
 
 Shared:
 
@@ -241,6 +241,7 @@ Not AI-generated at request time. Not hand-written per ZIP.
 ### City / county / state links
 
 - Breadcrumb + JSON-LD: Home → County (if named) → City → ZIP (`src/lib/schema.ts`)
+- Visible ZIP nav links to Home, County hub, and City hub
 - Neighbor grid: other ZIP URLs
 - City hub lists ZIPs in that city; county hub groups cities → ZIPs
 - Home lists `TEST_CITIES` (hardcoded Houston/Austin/Dallas/San Antonio sample ZIPs) plus live county hub cards
@@ -269,12 +270,12 @@ Not AI-generated at request time. Not hand-written per ZIP.
 | Canonical | `alternates.canonical` = public `directoryPath` / `countyPath` / `localeHomePath` (no `/en` on English). `metadataBase` = www `SITE_URL` | pages + `constants.ts` |
 | hreflang | `alternates.languages` en / es / x-default | pages |
 | Robots.txt | `allow: /`, sitemap URL, `host: SITE_URL` | `src/app/robots.ts` |
-| Per-page robots | `noindex, follow` on invalid locale metadata and ZIP city/state mismatch metadata | ZIP (and hub not-found metadata) |
-| Sitemap | Daily rebuild list of homes + hubs + ZIPs | `sitemap.ts`, `sitemap-urls.ts` |
+| Per-page robots | `noindex, follow` on invalid locale metadata and missing-ZIP metadata (404 body) | ZIP (and hub not-found metadata) |
+| Sitemap | Build-time URL list only (matches SSG). No lastmod | `sitemap.ts`, `sitemap-urls.ts` |
 | Open Graph | title, description, url, siteName, type website | page `generateMetadata` |
-| JSON-LD | `@graph`: BreadcrumbList, EmergencyService (address, geo, 24/7 hours, telephone, OfferCatalog), FAQPage | `schema.ts` |
-| Internal links | Neighbors, city/county lists, home TEST_CITIES + county cards, locale switch | `DirectoryPage`, hub pages, home, `LocaleSwitch` |
-| Visible breadcrumbs | City and county hub pages (nav). ZIP JSON-LD breadcrumb; ZIP visible crumb is location chips not a full crumb trail | hub `page.tsx`, `schema.ts` |
+| JSON-LD | `@graph`: BreadcrumbList, Organization + Service (`areaServed` PostalCode, no ZIP storefront geo/address, no `InStock`), FAQPage | `schema.ts` |
+| Internal links | Neighbors, ZIP→city/county hubs, city/county lists, home TEST_CITIES + county cards, locale switch | `DirectoryPage`, hub pages, home, `LocaleSwitch` |
+| Visible breadcrumbs | ZIP, city, and county hub pages | `DirectoryPage`, hub `page.tsx`, `schema.ts` |
 | H1 | ZIP: `variation.headline`; city/county: hub H1 functions; home: `homeH1` | `DirectoryPage.tsx`, hub/home pages |
 | H2 | Variation section headings + hub list headings | `DirectoryPage`, i18n |
 | Dynamic metadata | Yes, `generateMetadata` per route | pages |
@@ -332,13 +333,14 @@ Related files: `types.ts`, `directory.ts`, `neighbors.ts`, `paths.ts`, `ssot.ts`
 | Env override | `NEXT_PUBLIC_PHONE_EN*` / `NEXT_PUBLIC_PHONE_ES*` if not placeholder |
 | Per-service DB override | `service_categories.phone_en` / `phone_es` via `getLocalePhone` |
 | Placeholder detection | Empty, too-short, or all-zero numbers fall back to `TRACKING_PHONE` |
-| Call Now UI | `CallToAction` → `<a href={phone.tel}>` |
+| Call Now UI | `CallToAction` → `CallClickLink` `tel:` + click POST |
 | Mobile sticky | `StickyCallBar` (`md:hidden`, bottom, `z-50`) wraps sticky variant CTA: `Call Now · {number}` |
 | Header / footer | Header compact CTA; footer number link |
-| Schema telephone | `buildPageJsonLd` → `EmergencyService.telephone` |
-| Call tracking vendor JS | **Not in repo** (number swap is the tracking mechanism) |
-| Conversion / GA / GTM events | **Not implemented** |
-| IVR hint | Dictionary `ivr` string above hero CTA |
+| Schema telephone | `buildPageJsonLd` → Organization `telephone` |
+| Call tracking vendor JS | **Not in repo** (number swap is still the MarketCall mechanism) |
+| Click events | `POST /api/telemetry/call-click` records path, ZIP, locale, placement. `conversion: false`. No phone in payload |
+| Conversion / GA / GTM | Billed calls are **not** in app. Do not treat clicks as revenue |
+| IVR hint | Dictionary `ivr` does not invent keypad options |
 
 `constants.ts` still exports `HOTLINE_*` aliases of EN DID and unused `STICKY_TRUST_BADGES` (UI badges come from `i18n.stickyBadges` / `TrustBadges`).
 
@@ -366,7 +368,7 @@ Conversion-affecting UI (code):
 - Trust badges on ZIP pages
 - Price table + FAQ (intent to call, not a second conversion pixel)
 
-No on-page form beyond ZIP search. No click event analytics.
+No on-page form beyond ZIP search. Phone clicks are logged as leads, not billed conversions.
 
 ---
 
@@ -381,7 +383,7 @@ No on-page form beyond ZIP search. No click event analytics.
 
 All use `SITE_URL` (www). English entries have **no** `/en`.
 
-`sitemap.ts`: `lastModified = now`, `changeFrequency` daily for first two URLs else weekly, priority 1 / 0.8 / 0.7 by path depth. `revalidate = 86400`.
+`sitemap.ts`: build-time snapshot (`force-static`, no ISR). No lastmod. Same ZIP/hub list as `generateStaticParams`. `changeFrequency` daily for first two URLs else weekly.
 
 Robots: allow all user agents `/`; sitemap + host www.
 
@@ -389,7 +391,7 @@ Canonical: self-canonical public path. English `/en` URLs are 308, so they shoul
 
 Pagination: **none**.
 
-noindex: invalid locale metadata; ZIP page when the ZIP is missing or city/state slug does not match. Coverage-missing ZIP HTML is still **HTTP 200** with meta `robots: noindex` (not an HTTP 404, and not the lookup API’s JSON 404).
+noindex: invalid locale metadata; missing ZIP 404 metadata. Wrong-city URLs 308 away (not noindex 200).
 
 IndexNow: `GET|POST /api/indexnow` posts **entire** sitemap URL list to `api.indexnow.org`. Key file: `public/indexnow-key.txt` (must be publicly fetchable). Key constant is in `src/lib/indexnow.ts`.
 
@@ -460,8 +462,8 @@ From **source**, not a wish list:
 - `constants.ts` `REFERRAL_DISCLAIMER` / `TCPA` / `AFFILIATE_AVAILABILITY` coexist with **dictionary** strings actually rendered in footer (`i18n` + `SiteFooter`). Dual sources can drift.
 - `TEST_CITIES` hard-codes four metro sample ZIPs on the home grid (not derived from DB).
 - IndexNow route submits the **full** URL list with no auth in code (Needs verification: whether Vercel protects this).
-- ZIP **page** (missing ZIP, out of coverage, or city/state mismatch) returns **200** + coverage-missing UI + noindex meta, not HTTP/JSON 404. JSON 404 is **only** `/api/directory/lookup`.
-- Shortcut `/tx/city/zip` is **200 duplicate content** of `/locksmith/tx/city/zip` (canonical tag points at locksmith path).
+- ZIP **page** missing from geography returns **404**. Wrong city **308s**. JSON 404 is lookup for unknown ZIP; JSON 503 is lookup when the DB is down.
+- Shortcut `/tx/city/zip` **308s** to `/locksmith/tx/city/zip`.
 - `County === "the local"` fallback string when `county_name` empty.
 - `locksmithJobs` / short names still locksmith-centric; plumbing slug mapping exists in `content.ts` but unused in generation.
 
@@ -473,7 +475,7 @@ Operational (not in code): GSC discovered-not-indexed backlog and impression/cli
 
 **Observed in code (certain):**
 
-- **Duplicate URL classes:** `/en/...` (308), `/tx/city/zip` (200 rewrite + canonical), www vs apex (SITE_URL normalized to www; apex 308 is hosting-level, Needs verification on Vercel).
+- **Duplicate URL classes:** `/en/...` (308), `/tx/city/zip` (308 to canonical), www vs apex (SITE_URL normalized to www; apex 308 verified live).
 - **Templated pSEO at scale:** one `DirectoryPage` + hashed packs. Unique tokens are location/intent, not independently edited articles. Doorway-like if titles were identical — currently city+ZIP stay in headlines.
 - **Thin hubs:** city/county pages are lists + shared H1 pattern, not the full ZIP module stack.
 - **Sitemap includes every EN+ES ZIP/hub** including island metros that may still sit in GSC “Discovered”.
@@ -483,8 +485,8 @@ Operational (not in code): GSC discovered-not-indexed backlog and impression/cli
 
 - Google treating similar ZIP templates as duplicates (GSC “Google chose different canonical”).
 - `/en` 308 chains with trailing slash (observed historically as GSC redirect errors).
-- ES/EN pairs: hreflang + distinct canonicals; shared `@id` for the business entity is **not** implemented (each page URL is the EmergencyService `url`).
-- Schema `@type` is `EmergencyService`, not `Locksmith` (intentional vs referral). Rich result eligibility Needs verification via Rich Results Test.
+- ES/EN pairs: hreflang + distinct canonicals; Organization `@id` is `${SITE_URL}/#organization`.
+- Schema `@type` is Organization + Service (referral), not Locksmith and not InStock. Rich result eligibility Needs verification via Rich Results Test.
 - Home `TEST_CITIES` can internal-link island ZIPs (Austin/Dallas/SA) that are not the Houston mesh priority.
 
 **Not a code bug:** GSC “Discovered” means uncrawled sitemap/link URLs (`해당사항 없음` = no last crawl).

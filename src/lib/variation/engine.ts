@@ -1,4 +1,5 @@
 import { locationLabel, priceRange, shortServiceName } from "@/lib/content";
+import { getLocalePhone } from "@/lib/i18n";
 import type { ServiceCategory, ZipCode } from "@/lib/types";
 import { hashZipCode, pickIndex, pickUnique } from "@/lib/variation/hash";
 import {
@@ -38,6 +39,7 @@ export function buildCopyContext(
   const shortName = shortServiceName(service);
   const place = locationLabel(zip);
   const county = zip.county_name?.trim() || "the local";
+  const phone = getLocalePhone(locale, service);
   const ctx: CopyContext = {
     city: zip.city,
     county,
@@ -56,6 +58,7 @@ export function buildCopyContext(
       locale === "es"
         ? populationLabelEs(zip.population)
         : populationLabel(zip.population),
+    phoneDisplay: phone.display,
   };
   ctx.densityCopy =
     locale === "es" ? densityCopyEs(ctx) : densityCopy(ctx);
@@ -100,7 +103,6 @@ function assembleVariation(
     }),
   ];
 
-  const urbanLift = ctx.densityBand === "urban" ? 1.08 : 1;
   const heroPanel = HERO_PANEL[layoutId];
 
   return {
@@ -138,7 +140,7 @@ function assembleVariation(
     pricingHeading: pricing.heading,
     pricingIntro: pricing.intro,
     pricingTableLabels: locale === "es" ? PRICING_TABLE_ES : PRICING_TABLE_EN,
-    jobEstimates: locksmithJobs(ctx, urbanLift, locale),
+    jobEstimates: locksmithJobs(ctx, locale),
     faqHeading: pack.faqHeading(ctx),
     faqLead: pack.faqLead(ctx),
     faqs,

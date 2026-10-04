@@ -8,7 +8,14 @@ import { PriceTimeTable } from "@/components/PriceTimeTable";
 import { TexasDpsNotice } from "@/components/TexasDpsNotice";
 import { TrustBadges } from "@/components/TrustBadges";
 import type { AppLocale } from "@/lib/i18n";
-import { directoryPath } from "@/lib/paths";
+import { getDictionary } from "@/lib/i18n";
+import {
+  countyDisplayName,
+  countyPath,
+  directoryPath,
+  hasCountyName,
+  localeHomePath,
+} from "@/lib/paths";
 import type { DirectoryPageData, NeighborZip, ServiceCategory } from "@/lib/types";
 import type { PageVariation, SectionKey } from "@/lib/variation/types";
 
@@ -97,6 +104,7 @@ function NeighborGrid({
 
 export function DirectoryPage({ locale, data, variation }: DirectoryPageProps) {
   const { service, zip, neighbors } = data;
+  const copy = getDictionary(locale);
 
   const pricingTable = (tone: "hero" | "light") => (
     <PriceTimeTable
@@ -188,6 +196,44 @@ export function DirectoryPage({ locale, data, variation }: DirectoryPageProps) {
                 {variation.densityLabel}
               </p>
             </div>
+            <nav
+              aria-label={copy.locationNavLabel}
+              className="mb-4 flex max-w-full min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-sm text-white/70"
+            >
+              <Link href={localeHomePath(locale)} className="hover:text-white">
+                {copy.breadcrumbHome}
+              </Link>
+              {hasCountyName(zip.county_name) ? (
+                <>
+                  <span aria-hidden>/</span>
+                  <Link
+                    href={countyPath({
+                      locale,
+                      service: service.slug,
+                      state: zip.state_id,
+                      county: zip.county_name,
+                    })}
+                    className="hover:text-white"
+                  >
+                    {countyDisplayName(zip.county_name)}
+                  </Link>
+                </>
+              ) : null}
+              <span aria-hidden>/</span>
+              <Link
+                href={directoryPath({
+                  locale,
+                  service: service.slug,
+                  state: zip.state_id,
+                  city: zip.city,
+                })}
+                className="hover:text-white"
+              >
+                {zip.city}
+              </Link>
+              <span aria-hidden>/</span>
+              <span className="text-white">{zip.zip_code}</span>
+            </nav>
             <h1 className="max-w-3xl text-3xl font-semibold tracking-tight wrap-break-word sm:text-5xl sm:leading-[1.1]">
               {variation.headline}
             </h1>

@@ -1,4 +1,3 @@
-import { HOTLINE_DISPLAY } from "@/lib/constants";
 import { currentSeoYear } from "@/lib/content";
 import type { FaqItem } from "@/lib/types";
 import type {
@@ -27,6 +26,7 @@ export type CopyContext = {
   densityLabel: string;
   densityCopy: string;
   populationLabel: string;
+  phoneDisplay: string;
 };
 
 export type IntentHook = (ctx: CopyContext) => { headline: string; support: string };
@@ -92,18 +92,18 @@ export const LAYOUT_ORDERS: Record<LayoutId, SectionKey[]> = {
 };
 
 export const PAGE_CHROME_EN: PageChrome = {
-  asideDispatch: "Avg. dispatch",
-  asideZip: "Coverage ZIP",
+  asideDispatch: "Typical dispatch target",
+  asideZip: "This ZIP",
   asideArea: "Area type",
 };
 
 export const PRICING_TABLE_EN: PricingTableLabels = {
   service: "Service",
-  cost: "Cost range",
-  dispatch: "Dispatch time",
+  cost: "Catalog range",
+  dispatch: "Dispatch target",
   note: "Local note",
   disclaimer:
-    "Ranges are estimates for this ZIP. The technician confirms the quote on site before any work begins.",
+    "Job prices are a shared catalog, not a survey of this ZIP. Density is not used to invent a local rate. The technician confirms the quote on site before work begins. Dispatch times are typical targets from the service listing, not a guaranteed arrival.",
 };
 
 export function classifyDensity(density: number | null): DensityBand {
@@ -133,7 +133,7 @@ export const EN_INTENTS: Record<LayoutId, IntentPack> = {
     hooks: [
       (ctx) => ({
         headline: `24/7 Emergency Locksmith Dispatch in ${ctx.city}, ${ctx.stateId} ${ctx.zip}`,
-        support: `Locked out of a home, car, or office in ${ctx.place}? Call ${HOTLINE_DISPLAY}. A licensed tech is typically moving within ${ctx.responseTime}. You approve the on-site estimate before any work.`,
+        support: `Locked out of a home, car, or office in ${ctx.place}? Call ${ctx.phoneDisplay}. We can connect you with an independent locksmith when one is available. Typical listing window: ${ctx.responseTime}. You approve the on-site estimate before any work.`,
       }),
       (ctx) => ({
         headline: `Locked Out in ${ctx.city} ${ctx.zip}? Live Emergency Locksmith Routing`,
@@ -152,7 +152,7 @@ export const EN_INTENTS: Record<LayoutId, IntentPack> = {
     }),
     aside: (ctx) => ({
       title: "Emergency window",
-      body: `Lockout tickets in ${ctx.zip} usually clear in ${ctx.responseTime}. Call ${HOTLINE_DISPLAY} with the exact building or subdivision.`,
+      body: `Lockout tickets in ${ctx.zip} usually clear in ${ctx.responseTime}. Call ${ctx.phoneDisplay} with the exact building or subdivision.`,
       metric: ctx.responseTime,
       metricLabel: "Typical arrival",
     }),
@@ -168,7 +168,7 @@ export const EN_INTENTS: Record<LayoutId, IntentPack> = {
     }),
     process: (ctx) => ({
       heading: `How emergency dispatch works in ${ctx.zip}`,
-      intro: `Three steps, then a licensed tech is moving toward ${ctx.place}. Call ${HOTLINE_DISPLAY}.`,
+      intro: `Three steps, then we try to match an independent technician for ${ctx.place}. Call ${ctx.phoneDisplay}.`,
       steps: [
         {
           step: 1,
@@ -198,7 +198,7 @@ export const EN_INTENTS: Record<LayoutId, IntentPack> = {
     requiredFaqs: (ctx) => [
       {
         question: `How fast can a locksmith reach ${ctx.place} in an emergency?`,
-        answer: `Average dispatch for ${ctx.zip} is ${ctx.responseTime}. ${ctx.densityBand === "urban" ? "Downtown and mid-rise calls" : "Suburban driveway calls"} are matched to techs already in ${countyLabel(ctx)}. Call ${HOTLINE_DISPLAY} with the exact building or cross-street.`,
+        answer: `The listed dispatch target for this service is ${ctx.responseTime}. That is not a measured average for ${ctx.zip}. ${ctx.densityBand === "urban" ? "Downtown and mid-rise calls" : "Suburban driveway calls"} are referred to independent technicians when one is available in ${countyLabel(ctx)}. Call ${ctx.phoneDisplay} with the exact building or cross-street.`,
       },
       {
         question: `What should I do while I wait for a locksmith in ${ctx.zip}?`,
@@ -239,7 +239,7 @@ export const EN_INTENTS: Record<LayoutId, IntentPack> = {
     faqLead: (ctx) =>
       `Dispatch-first answers for ${ctx.place}. Cost and licensing details still appear below — this block stays on arrival time.`,
     meta: (ctx) =>
-      `24/7 emergency locksmith dispatch in ${ctx.city}, ${ctx.stateId} ${ctx.zip}. Typical arrival ${ctx.responseTime}. Call ${HOTLINE_DISPLAY} for live routing.`.slice(
+      `24/7 emergency locksmith dispatch in ${ctx.city}, ${ctx.stateId} ${ctx.zip}. Typical arrival ${ctx.responseTime}. Call ${ctx.phoneDisplay} for live routing.`.slice(
         0,
         160,
       ),
@@ -263,7 +263,7 @@ export const EN_INTENTS: Record<LayoutId, IntentPack> = {
     intro: (ctx) => ({
       heading: `What emergency locksmith work costs in ${ctx.zip}`,
       paragraphs: [
-        `Callers in ${ctx.city} want the number before the van moves. For ${ctx.place}, typical emergency work lands in ${ctx.priceRange}, with an arrival window around ${ctx.responseTime}. Density changes parking and drive time — the table splits common jobs so ${ctx.zip} is not stuck with a generic statewide average.`,
+        `Callers in ${ctx.city} want the number before anyone rolls. For ${ctx.place}, the service listing uses ${ctx.priceRange} as a planning band, with a typical dispatch target of ${ctx.responseTime}. Density here affects parking and drive time in the copy, not a local price table. The job rows are a shared catalog so ${ctx.zip} is not treated as a measured local survey.`,
         `Nothing on this page is a binding bid. Texas locksmiths confirm the cylinder, vehicle, or storefront on site. You approve the estimate before drilling, rekeying, or replacing hardware.`,
       ],
       checklistHeading: `Job types priced for ${ctx.city} nights`,
@@ -454,7 +454,7 @@ export const EN_INTENTS: Record<LayoutId, IntentPack> = {
     extraFaqs: (ctx) => [
       {
         question: `What if the arriving tech cannot show a license in ${ctx.city}?`,
-        answer: `Do not authorize drilling or rekeying. Call ${HOTLINE_DISPLAY} so we can rematch a company that can legally service ${ctx.zip}.`,
+        answer: `Do not authorize drilling or rekeying. Call ${ctx.phoneDisplay} so we can rematch a company that can legally service ${ctx.zip}.`,
       },
       {
         question: `Does a cheaper unlicensed locksmith save money in ${ctx.zip}?`,
@@ -481,7 +481,7 @@ export const EN_INTENTS: Record<LayoutId, IntentPack> = {
     faqLead: (ctx) =>
       `TX DPS–first answers for ${ctx.place}. Price and arrival time still matter — this block stays on who is legal to send.`,
     meta: (ctx) =>
-      `Licensed locksmith in ${ctx.city}, ${ctx.stateId} ${ctx.zip}. TX DPS Private Security routing for ${countyLabel(ctx)}. Call ${HOTLINE_DISPLAY}.`.slice(
+      `Locksmith referral in ${ctx.city}, ${ctx.stateId} ${ctx.zip}. TX DPS Private Security referral routing for ${countyLabel(ctx)}. Call ${ctx.phoneDisplay}.`.slice(
         0,
         160,
       ),
@@ -619,26 +619,21 @@ export function interpolateList(items: string[], ctx: CopyContext) {
 
 export function locksmithJobs(
   ctx: CopyContext,
-  urbanLift: number,
   locale: "en" | "es" = "en",
 ): JobEstimate[] {
-  const bump = (min: number, max: number) => {
-    const low = Math.round(min * urbanLift);
-    const high = Math.round(max * urbanLift);
-    return `$${low} – $${high}`;
-  };
+  const range = (min: number, max: number) => `$${min} – $${max}`;
 
   if (locale === "es") {
     return [
       {
         job: "Apertura de auto",
-        price: bump(55, 140),
+        price: range(55, 140),
         time: ctx.responseTime,
         note: `Calle o estacionamiento en ${ctx.city} ${ctx.zip}`,
       },
       {
         job: "Apertura de casa",
-        price: bump(45, 125),
+        price: range(45, 125),
         time: ctx.responseTime,
         note:
           ctx.densityBand === "urban"
@@ -647,19 +642,19 @@ export function locksmithJobs(
       },
       {
         job: "Cambio de combinación (rekey)",
-        price: bump(80, 165),
+        price: range(80, 165),
         time: ctx.responseTime,
         note: "Por cerradura tras mudanza, cambio de roomie o llave perdida",
       },
       {
         job: "Instalación de cerradura inteligente",
-        price: bump(110, 240),
+        price: range(110, 240),
         time: ctx.responseTime,
         note: "El herraje se cotiza en sitio antes de emparejar",
       },
       {
         job: "Extracción de llave rota",
-        price: bump(70, 155),
+        price: range(70, 155),
         time: ctx.responseTime,
         note: "Se conserva el cilindro cuando el mecanismo lo permite",
       },
@@ -669,13 +664,13 @@ export function locksmithJobs(
   return [
     {
       job: "Car Lockout",
-      price: bump(55, 140),
+      price: range(55, 140),
       time: ctx.responseTime,
       note: `Street or lot in ${ctx.city} ${ctx.zip}`,
     },
     {
       job: "House Lockout",
-      price: bump(45, 125),
+      price: range(45, 125),
       time: ctx.responseTime,
       note:
         ctx.densityBand === "urban"
@@ -684,19 +679,19 @@ export function locksmithJobs(
     },
     {
       job: "Rekeying",
-      price: bump(80, 165),
+      price: range(80, 165),
       time: ctx.responseTime,
       note: "Per lock after a move, roommate change, or lost-key event",
     },
     {
       job: "Smart Lock Installation",
-      price: bump(110, 240),
+      price: range(110, 240),
       time: ctx.responseTime,
       note: "Hardware quoted on site before pairing",
     },
     {
       job: "Broken Key Extraction",
-      price: bump(70, 155),
+      price: range(70, 155),
       time: ctx.responseTime,
       note: "Cylinder saved when the wafer stack allows",
     },

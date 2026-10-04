@@ -1,5 +1,5 @@
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
-import { locationLabel, priceRange, shortServiceName } from "@/lib/content";
+import { locationLabel, shortServiceName } from "@/lib/content";
 import { getDictionary, getLocalePhone, type AppLocale } from "@/lib/i18n";
 import {
   countyDisplayName,
@@ -72,15 +72,15 @@ export function buildPageJsonLd(
   locale: AppLocale = "en",
 ) {
   const shortName = shortServiceName(data.service);
-  const geo = toGeoCoordinates(data.zip);
   const phone = getLocalePhone(locale, data.service);
-  const address = {
-    "@type": "PostalAddress" as const,
+  const areaServed = {
+    "@type": "PostalCode" as const,
+    postalCode: data.zip.zip_code,
     addressLocality: data.zip.city,
     addressRegion: data.zip.state_id,
-    postalCode: data.zip.zip_code,
     addressCountry: "US",
   };
+  const orgId = `${SITE_URL}/#organization`;
 
   const pricingFaqs = variation.jobEstimates.map((job) => ({
     "@type": "Question",
@@ -156,38 +156,35 @@ export function buildPageJsonLd(
     itemListElement: crumbItems,
   };
 
+  const referralDescription =
+    locale === "es"
+      ? `${SITE_NAME} es un servicio de referidos. Esta página cubre el código postal ${data.zip.zip_code} en ${data.zip.city}, ${data.zip.state_id}. No es la dirección de un taller.`
+      : `${SITE_NAME} is a referral matching service. This page covers ZIP ${data.zip.zip_code} in ${data.zip.city}, ${data.zip.state_id}. It is not a shop address.`;
+
   return {
     "@context": "https://schema.org",
     "@graph": [
       breadcrumb,
       {
-        "@type": "EmergencyService",
-        name: `${SITE_NAME} 24/7 Emergency ${shortName}`,
+        "@type": "Organization",
+        "@id": orgId,
+        name: SITE_NAME,
+        url: SITE_URL,
+        telephone: phone.schemaTelephone,
+        description: referralDescription,
+      },
+      {
+        "@type": "Service",
+        name: `${shortName} referral in ${locationLabel(data.zip)}`,
+        serviceType: `Emergency ${shortName} referral`,
         description: variation.metaDescription,
         url: pageUrl,
-        telephone: phone.schemaTelephone,
-        priceRange: priceRange(data.service),
-        areaServed: address,
-        address,
-        ...(geo ? { geo } : {}),
-        openingHoursSpecification: {
-          "@type": "OpeningHoursSpecification",
-          dayOfWeek: [
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday",
-          ],
-          opens: "00:00",
-          closes: "23:59",
-        },
+        provider: { "@id": orgId },
+        areaServed,
         offers: {
           "@type": "Offer",
           url: pageUrl,
-          availability: "https://schema.org/InStock",
+          category: "Referral",
           priceCurrency: "USD",
           priceSpecification: toPriceSpecification(
             data.service.avg_price_min,
@@ -196,7 +193,7 @@ export function buildPageJsonLd(
         },
         hasOfferCatalog: {
           "@type": "OfferCatalog",
-          name: `${shortName} cost ranges in ${locationLabel(data.zip)}`,
+          name: `Illustrative ${shortName} ranges for ${locationLabel(data.zip)}`,
           itemListElement: variation.jobEstimates.map((job) => {
             const priceSpecification = parseUsdRange(job.price);
             return {
@@ -205,7 +202,7 @@ export function buildPageJsonLd(
                 "@type": "Service",
                 name: job.job,
               },
-              description: `${job.note}. Dispatch ${job.time}.`,
+              description: `${job.note}. Typical dispatch window ${job.time}.`,
               ...(priceSpecification ? { priceSpecification } : {}),
             };
           }),

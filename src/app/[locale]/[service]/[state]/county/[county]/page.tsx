@@ -10,6 +10,7 @@ import { isPhaseCoverage } from "@/lib/ssot";
 import { serializeJsonLd } from "@/lib/schema";
 
 export const revalidate = 86400;
+export const dynamicParams = false;
 
 type CountyHubProps = {
   params: Promise<{
