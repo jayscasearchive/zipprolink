@@ -132,6 +132,9 @@ type Dictionary = {
   homeLead: string;
   coverageHeading: string;
   coverageLead: string;
+  cityHubsHeading: string;
+  cityHubCardMeta: (zipCount: number) => string;
+  zipExamplesHeading: string;
   whyHeading: string;
   whyItems: { title: string; body: string }[];
   searchPlaceholder: string;
@@ -189,6 +192,10 @@ export const dictionaries: Record<AppLocale, Dictionary> = {
       "Compare typical locksmith cost ranges, then call for a no-obligation estimate. Independent technicians are matched when a provider is available across Houston, Austin, Dallas, San Antonio, and other Texas listings.",
     coverageHeading: "Texas locksmith coverage",
     coverageLead: "Phase 1 pilot pages for Texas emergency locksmith dispatch.",
+    cityHubsHeading: "Major Texas cities",
+    cityHubCardMeta: (zipCount) =>
+      `${zipCount} ZIP ${zipCount === 1 ? "listing" : "listings"}`,
+    zipExamplesHeading: "Sample ZIP pages",
     whyHeading: "Why ZipProLink",
     whyItems: [
       {
@@ -265,6 +272,10 @@ export const dictionaries: Record<AppLocale, Dictionary> = {
     coverageHeading: "Cobertura de cerrajeros en Texas",
     coverageLead:
       "Páginas piloto de la fase 1 para despacho de cerrajeros de emergencia en Texas.",
+    cityHubsHeading: "Ciudades principales de Texas",
+    cityHubCardMeta: (zipCount) =>
+      `${zipCount} ${zipCount === 1 ? "código ZIP" : "códigos ZIP"}`,
+    zipExamplesHeading: "Páginas ZIP de ejemplo",
     whyHeading: "Por qué ZipProLink",
     whyItems: [
       {

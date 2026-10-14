@@ -5,7 +5,11 @@ import { ArrowRight, ShieldCheck, Zap } from "lucide-react";
 import { DirectorySearch } from "@/components/DirectorySearch";
 import { SITE_NAME, SITE_URL, TEST_CITIES } from "@/lib/constants";
 import { currentSeoYear } from "@/lib/content";
-import { getCountyHubSummaries, getPhaseServices } from "@/lib/directory";
+import {
+  getCountyHubSummaries,
+  getFeaturedCityHubs,
+  getPhaseServices,
+} from "@/lib/directory";
 import { getDictionary, isAppLocale } from "@/lib/i18n";
 import { countyPath, directoryPath, localeHomePath } from "@/lib/paths";
 
@@ -54,8 +58,9 @@ export default async function LocaleHomePage({ params }: HomeProps) {
 
   const locale = raw;
   const copy = getDictionary(locale);
-  const [serviceOptions, countyHubs] = await Promise.all([
+  const [serviceOptions, cityHubs, countyHubs] = await Promise.all([
     getPhaseServices(),
+    getFeaturedCityHubs(),
     getCountyHubSummaries(),
   ]);
   const seoYear = currentSeoYear();
@@ -92,32 +97,66 @@ export default async function LocaleHomePage({ params }: HomeProps) {
           </h2>
           <p className="mt-2 text-sm text-slate-600">{copy.coverageLead}</p>
         </div>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {TEST_CITIES.map((city) => (
-            <Link
-              key={`${city.zip}-${city.service}`}
-              href={directoryPath({
-                locale,
-                service: city.service,
-                state: city.state,
-                city: city.city,
-                zip: city.zip,
-              })}
-              className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-emergency/40 hover:shadow-lg"
-            >
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emergency">
-                {city.service}
-              </p>
-              <p className="mt-2 text-lg font-semibold text-navy">
-                {city.city}, {city.state}
-              </p>
-              <p className="text-sm text-slate-500">ZIP {city.zip}</p>
-              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-navy">
-                {copy.openPage}
-                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
-              </span>
-            </Link>
-          ))}
+        {cityHubs.length > 0 ? (
+          <nav aria-label={copy.cityHubsHeading} className="mt-8 min-w-0">
+            <h3 className="text-xl font-semibold tracking-tight text-navy">
+              {copy.cityHubsHeading}
+            </h3>
+            <ul className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+              {cityHubs.map((hub) => (
+                <li key={`${hub.stateId}-${hub.citySlug}`} className="min-w-0">
+                  <Link
+                    href={directoryPath({
+                      locale,
+                      service: hub.service,
+                      state: hub.stateId,
+                      city: hub.cityName,
+                    })}
+                    className="flex min-h-11 min-w-0 flex-col justify-center rounded-xl border border-slate-200 bg-white px-3 py-3 shadow-sm transition hover:border-emergency/40 hover:shadow-md sm:px-4"
+                  >
+                    <span className="truncate text-base font-semibold text-navy">
+                      {hub.cityName}
+                    </span>
+                    <span className="text-sm text-slate-500">
+                      {copy.cityHubCardMeta(hub.zipCount)}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ) : null}
+        <div className="mt-12 min-w-0">
+          <h3 className="text-xl font-semibold tracking-tight text-navy">
+            {copy.zipExamplesHeading}
+          </h3>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {TEST_CITIES.map((city) => (
+              <Link
+                key={`${city.zip}-${city.service}`}
+                href={directoryPath({
+                  locale,
+                  service: city.service,
+                  state: city.state,
+                  city: city.city,
+                  zip: city.zip,
+                })}
+                className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-emergency/40 hover:shadow-lg"
+              >
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emergency">
+                  {city.service}
+                </p>
+                <p className="mt-2 text-lg font-semibold text-navy">
+                  {city.city}, {city.state}
+                </p>
+                <p className="text-sm text-slate-500">ZIP {city.zip}</p>
+                <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-navy">
+                  {copy.openPage}
+                  <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+                </span>
+              </Link>
+            ))}
+          </div>
         </div>
         {countyHubs.length > 0 ? (
           <div className="mt-12 min-w-0">

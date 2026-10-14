@@ -66,3 +66,11 @@ export const TEST_CITIES = [
     service: phaseService,
   },
 ] as const;
+
+/** Homepage city-hub crawl targets. Only rendered if a live hub exists. */
+export const FEATURED_CITY_HUBS = [
+  { city: "Houston", state: "TX" },
+  { city: "Dallas", state: "TX" },
+  { city: "Austin", state: "TX" },
+  { city: "San Antonio", state: "TX" },
+] as const;

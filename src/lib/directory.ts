@@ -21,6 +21,7 @@ import {
   isMissingColumnError,
   isMissingRelationError,
 } from "@/lib/query-errors";
+import { FEATURED_CITY_HUBS } from "@/lib/constants";
 import { currentPhaseService, isPhaseCoverage } from "@/lib/ssot";
 import { supabase } from "@/lib/supabase";
 import type {
@@ -70,6 +71,14 @@ export type CountyHubSummary = {
   countyLabel: string;
   zipCount: number;
   cityCount: number;
+};
+
+export type FeaturedCityHub = {
+  service: string;
+  stateId: string;
+  cityName: string;
+  citySlug: string;
+  zipCount: number;
 };
 
 const SERVICE_SELECT_WITH_DID =
@@ -382,6 +391,35 @@ export async function getCountyHubSummaries(): Promise<CountyHubSummary[]> {
   }
 
   return summaries.sort((a, b) => a.countyLabel.localeCompare(b.countyLabel));
+}
+
+export async function getFeaturedCityHubs(): Promise<FeaturedCityHub[]> {
+  const service = currentPhaseService();
+  const zips = await getPhaseCoverageZips();
+  const hubs: FeaturedCityHub[] = [];
+
+  for (const featured of FEATURED_CITY_HUBS) {
+    const slug = citySlug(featured.city);
+    const stateId = featured.state.toUpperCase();
+    const cityZips = zips.filter(
+      (zip) =>
+        zip.state_id.toUpperCase() === stateId && citySlug(zip.city) === slug,
+    );
+    const sample = cityZips[0];
+    if (!sample) {
+      continue;
+    }
+
+    hubs.push({
+      service: service.slug,
+      stateId,
+      cityName: sample.city,
+      citySlug: slug,
+      zipCount: cityZips.length,
+    });
+  }
+
+  return hubs;
 }
 
 export async function getCountyStaticParams(): Promise<CountyStaticParam[]> {
