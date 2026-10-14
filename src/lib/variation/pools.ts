@@ -137,7 +137,7 @@ export const EN_INTENTS: Record<LayoutId, IntentPack> = {
       }),
       (ctx) => ({
         headline: `Locked Out in ${ctx.city} ${ctx.zip}? Live Emergency Locksmith Routing`,
-        support: `Night, weekend, and holiday lockouts in ${countyLabel(ctx)} stay on a live desk. Typical arrival ${ctx.responseTime}. Keep the door closed and share the exact building or cross-street.`,
+        support: `You can call about night, weekend, and holiday lockouts in ${countyLabel(ctx)}. Typical listing window ${ctx.responseTime} when an independent provider is available. Keep the door closed and share the exact building or cross-street.`,
       }),
     ],
     intro: (ctx) => ({
@@ -173,7 +173,7 @@ export const EN_INTENTS: Record<LayoutId, IntentPack> = {
         {
           step: 1,
           title: "24/7 lockout intake",
-          detail: `Tell us ZIP ${ctx.zip}, the lock type, and whether anyone is inside. Nights and holidays are staffed.`,
+          detail: `Tell us ZIP ${ctx.zip}, the lock type, and whether anyone is inside. Intake can be placed day or night; a technician is referred only when a provider is available.`,
         },
         {
           step: 2,
@@ -206,7 +206,7 @@ export const EN_INTENTS: Record<LayoutId, IntentPack> = {
       },
       {
         question: `Is after-hours emergency locksmith service available in ${ctx.city} on weekends?`,
-        answer: `Yes. Coverage is 24/7, including weekends and Texas holidays. ${ctx.zip} stays on a live desk — you are not waiting for Monday-morning shop hours.`,
+        answer: `You can call 24/7, including weekends and Texas holidays. That is intake, not a guarantee that a technician will arrive. Referral to an independent provider for ${ctx.zip} depends on location, technician availability, provider participation, and demand.`,
       },
     ],
     extraFaqs: (ctx) => [

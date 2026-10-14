@@ -125,6 +125,7 @@ type Dictionary = {
   referralDisclaimer: string;
   tcpaDisclaimer: string;
   availabilityDisclaimer: string;
+  personsDepictedDisclaimer: string;
   dpsShort: string;
   homeTagline: string;
   homeH1: (year: number) => string;
@@ -172,11 +173,13 @@ export const dictionaries: Record<AppLocale, Dictionary> = {
       "Direct Tech Connection",
     ],
     referralDisclaimer:
-      "ZipProLink is a free referral matching service that connects homeowners and drivers with independent, licensed local service technicians. ZipProLink does not directly provide locksmith, plumbing, or emergency services, nor does it employ technicians. All service providers are independent contractors responsible for maintaining their own licensing (including TX DPS PSB compliance) and insurance.",
+      "ZipProLink is a free referral matching service that connects homeowners and drivers with independent local service technicians. ZipProLink does not directly provide locksmith, plumbing, or emergency services, nor does it employ technicians. All contractors/providers are independent and ZipProLink does not warrant or guarantee any work performed. It is the responsibility of the homeowner to verify that the hired contractor furnishes the necessary license and insurance required for the work being performed.",
     tcpaDisclaimer:
       "Calls may be recorded for quality and training purposes.",
     availabilityDisclaimer:
       "Same-day and 24/7 emergency services are subject to provider participation, location, technician availability, and demand. Availability is not guaranteed and may vary by market and appointment capacity.",
+    personsDepictedDisclaimer:
+      "All persons depicted in a photo or video are actors or models and not contractors listed on this site.",
     dpsShort:
       "TX DPS PSB referral matching service — independent contractors; verify license and insurance before work begins.",
     homeTagline: "24/7 Emergency Locksmith Cost & Dispatch · Texas",
@@ -206,7 +209,7 @@ export const dictionaries: Record<AppLocale, Dictionary> = {
     searchError: "Enter a valid 5-digit US ZIP code.",
     openPage: "Open page",
     licensedLine: "Referral matching · independent technicians · on-site estimates when a provider is available",
-    hotlineBadge: "24/7 Hotline",
+    hotlineBadge: "24/7 Call Line",
     headerSubtitle: "Emergency Home Services",
     footerBrand: "ZipProLink · Texas Emergency Locksmith Directory",
     cityHubH1: (year, city, state) =>
@@ -245,11 +248,13 @@ export const dictionaries: Record<AppLocale, Dictionary> = {
       "Empareje con técnico con licencia",
     ],
     referralDisclaimer:
-      "ZipProLink es un servicio gratuito de emparejamiento por referido que conecta a propietarios y conductores con técnicos locales independientes y con licencia. ZipProLink no presta directamente servicios de cerrajería, plomería ni emergencias, ni emplea a los técnicos. Todos los proveedores son contratistas independientes responsables de mantener su propia licencia (incluido el cumplimiento TX DPS PSB) y su seguro.",
+      "ZipProLink es un servicio gratuito de emparejamiento por referido que conecta a propietarios y conductores con técnicos locales independientes. ZipProLink no presta directamente servicios de cerrajería, plomería ni emergencias, ni emplea a los técnicos. Todos los contratistas/proveedores son independientes y ZipProLink no garantiza ni se responsabiliza de ningún trabajo realizado. Es responsabilidad del propietario verificar que el contratista contratado cuente con la licencia y el seguro necesarios para el trabajo que se va a realizar.",
     tcpaDisclaimer:
       "Las llamadas pueden grabarse con fines de calidad y capacitación.",
     availabilityDisclaimer:
       "Los servicios el mismo día y de emergencia 24/7 dependen de la participación del proveedor, la ubicación, la disponibilidad del técnico y la demanda. La disponibilidad no está garantizada y puede variar según el mercado y la capacidad de citas.",
+    personsDepictedDisclaimer:
+      "Todas las personas que aparecen en una foto o video son actores o modelos y no son contratistas listados en este sitio.",
     dpsShort:
       "Servicio de referidos TX DPS PSB — contratistas independientes; verifique licencia y seguro antes de iniciar el trabajo.",
     homeTagline: "Costo y despacho de cerrajero de emergencia 24/7 · Texas",
@@ -281,7 +286,7 @@ export const dictionaries: Record<AppLocale, Dictionary> = {
     openPage: "Abrir página",
     licensedLine:
       "Emparejamiento por referido · técnicos independientes · estimados en sitio cuando hay un proveedor disponible",
-    hotlineBadge: "Línea 24/7",
+    hotlineBadge: "Línea de llamadas 24/7",
     headerSubtitle: "Servicios de emergencia para el hogar",
     footerBrand: "ZipProLink · Directorio de cerrajeros de emergencia en Texas",
     cityHubH1: (_year, city, state) =>

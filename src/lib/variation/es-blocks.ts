@@ -42,7 +42,7 @@ export const ES_INTENTS: Record<LayoutId, IntentPack> = {
       }),
       (ctx) => ({
         headline: `¿Se quedó fuera en ${ctx.city}? Cerrajero de emergencia ${ctx.zip}`,
-        support: `Cierres de noche, fin de semana y día festivo en ${countyLabel(ctx)} siguen en un escritorio en vivo. Llegada típica ${ctx.responseTime}. No force la puerta y dé el edificio o el cruce exacto.`,
+        support: `Puede llamar por cierres de noche, fin de semana y día festivo en ${countyLabel(ctx)}. Ventana típica del listado ${ctx.responseTime} cuando hay un proveedor independiente disponible. No force la puerta y dé el edificio o el cruce exacto.`,
       }),
     ],
     intro: (ctx) => ({
@@ -78,7 +78,7 @@ export const ES_INTENTS: Record<LayoutId, IntentPack> = {
         {
           step: 1,
           title: "Admisión de cierre 24/7",
-          detail: `Indique el ZIP ${ctx.zip}, el tipo de cerradura y si hay alguien adentro. Noches y festivos están cubiertos.`,
+          detail: `Indique el ZIP ${ctx.zip}, el tipo de cerradura y si hay alguien adentro. La admisión de la llamada puede hacerse de día o de noche; se refiere a un técnico solo cuando hay un proveedor disponible.`,
         },
         {
           step: 2,
@@ -111,7 +111,7 @@ export const ES_INTENTS: Record<LayoutId, IntentPack> = {
       },
       {
         question: `¿Hay cerrajero de emergencia fuera de horario en ${ctx.city} los fines de semana?`,
-        answer: `Sí. La cobertura es 24/7, incluidos fines de semana y festivos de Texas. ${ctx.zip} sigue en un escritorio en vivo — no espera al lunes por la mañana.`,
+        answer: `Puede llamar 24/7, incluidos fines de semana y festivos de Texas. Eso es admisión de la llamada, no una garantía de que llegue un técnico. El referido a un proveedor independiente para ${ctx.zip} depende de la ubicación, la disponibilidad del técnico, la participación del proveedor y la demanda.`,
       },
     ],
     extraFaqs: (ctx) => [

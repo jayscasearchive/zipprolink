@@ -31,9 +31,14 @@ export function ReferralDisclaimer({
         {copy.referralDisclaimer}
       </p>
       {!compact ? (
-        <p className="mt-2 text-[11px] leading-5 wrap-break-word [overflow-wrap:anywhere] sm:text-xs">
-          {copy.tcpaDisclaimer}
-        </p>
+        <>
+          <p className="mt-2 text-[11px] leading-5 wrap-break-word [overflow-wrap:anywhere] sm:text-xs">
+            {copy.tcpaDisclaimer}
+          </p>
+          <p className="mt-2 text-[11px] leading-5 wrap-break-word [overflow-wrap:anywhere] sm:text-xs">
+            {copy.personsDepictedDisclaimer}
+          </p>
+        </>
       ) : (
         <p className="mt-1 text-[10px] leading-4 wrap-break-word [overflow-wrap:anywhere]">
           {copy.dpsShort} {copy.tcpaDisclaimer}
