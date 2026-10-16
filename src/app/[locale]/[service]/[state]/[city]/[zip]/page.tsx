@@ -6,7 +6,7 @@ import {
   getDirectoryPageData,
   getZipStaticParams,
 } from "@/lib/directory";
-import { isAppLocale } from "@/lib/i18n";
+import { isAppLocale, type AppLocale } from "@/lib/i18n";
 import { citySlug, directoryPath, parseStateId } from "@/lib/paths";
 import { DirectoryUnavailableError } from "@/lib/query-errors";
 import {
@@ -14,7 +14,32 @@ import {
   serializeJsonLd,
 } from "@/lib/schema";
 import { isPhaseCoverage } from "@/lib/ssot";
+import type { DirectoryPageData } from "@/lib/types";
 import { buildPageVariation, localizePageVariation } from "@/lib/variation";
+import type { PageVariation } from "@/lib/variation/types";
+import {
+  getHouston77006HubLink,
+  isHouston77006Page,
+  overlayZipVariationIfHouston77006,
+} from "@/lib/zips/houston-77006";
+
+function zipPageVariation(
+  data: DirectoryPageData,
+  locale: AppLocale,
+): PageVariation {
+  return overlayZipVariationIfHouston77006(
+    localizePageVariation(
+      buildPageVariation(data.service, data.zip),
+      locale,
+      data.service,
+      data.zip,
+    ),
+    data.zip.city,
+    data.zip.state_id,
+    data.zip.zip_code,
+    locale,
+  );
+}
 
 export const revalidate = 86400;
 export const dynamicParams = false;
@@ -70,15 +95,11 @@ export async function generateMetadata({
     permanentRedirect(canonical);
   }
 
-  const variation = localizePageVariation(
-    buildPageVariation(data.service, data.zip),
-    raw,
-    data.service,
-    data.zip,
-  );
+  const variation = zipPageVariation(data, raw);
+  const documentTitle = variation.documentTitle ?? variation.headline;
 
   return {
-    title: { absolute: variation.headline },
+    title: { absolute: documentTitle },
     description: variation.metaDescription,
     alternates: {
       canonical,
@@ -107,7 +128,7 @@ export async function generateMetadata({
       },
     },
     openGraph: {
-      title: variation.headline,
+      title: documentTitle,
       description: variation.metaDescription,
       url: canonical,
       siteName: SITE_NAME,
@@ -151,12 +172,7 @@ export default async function ServiceZipPage({ params }: ZipPageProps) {
     permanentRedirect(canonical);
   }
 
-  const variation = localizePageVariation(
-    buildPageVariation(data.service, data.zip),
-    raw,
-    data.service,
-    data.zip,
-  );
+  const variation = zipPageVariation(data, raw);
   const pageUrl = `${SITE_URL}${directoryPath({
     locale: raw,
     service: data.service.slug,
@@ -164,12 +180,24 @@ export default async function ServiceZipPage({ params }: ZipPageProps) {
     city: data.zip.city,
     zip: data.zip.zip_code,
   })}`;
+  const cityHubLink = isHouston77006Page(
+    data.zip.city,
+    data.zip.state_id,
+    data.zip.zip_code,
+  )
+    ? getHouston77006HubLink(raw)
+    : undefined;
 
   return (
     <div className="min-w-0 max-w-full bg-white">
       <JsonLd json={buildPageJsonLd(data, variation, pageUrl, raw)} />
       <main>
-        <DirectoryPage locale={raw} data={data} variation={variation} />
+        <DirectoryPage
+          locale={raw}
+          data={data}
+          variation={variation}
+          cityHubLink={cityHubLink}
+        />
       </main>
     </div>
   );

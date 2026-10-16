@@ -23,6 +23,12 @@ type DirectoryPageProps = {
   locale: AppLocale;
   data: DirectoryPageData;
   variation: PageVariation;
+  cityHubLink?: {
+    href: string;
+    before: string;
+    label: string;
+    after: string;
+  };
 };
 
 function NeighborGrid({
@@ -102,7 +108,12 @@ function NeighborGrid({
   );
 }
 
-export function DirectoryPage({ locale, data, variation }: DirectoryPageProps) {
+export function DirectoryPage({
+  locale,
+  data,
+  variation,
+  cityHubLink,
+}: DirectoryPageProps) {
   const { service, zip, neighbors } = data;
   const copy = getDictionary(locale);
 
@@ -282,7 +293,9 @@ export function DirectoryPage({ locale, data, variation }: DirectoryPageProps) {
                 <dl className="mt-6 space-y-3 text-sm">
                   <div className="flex justify-between gap-4 border-b border-white/10 pb-3">
                     <dt className="text-white/60">{variation.chrome.asideDispatch}</dt>
-                    <dd className="font-semibold">{service.avg_response_time}</dd>
+                    <dd className="font-semibold">
+                      {variation.asideDispatchValue ?? service.avg_response_time}
+                    </dd>
                   </div>
                   <div className="flex justify-between gap-4 border-b border-white/10 pb-3">
                     <dt className="text-white/60">{variation.chrome.asideZip}</dt>
@@ -318,6 +331,15 @@ export function DirectoryPage({ locale, data, variation }: DirectoryPageProps) {
             {variation.introParagraphs.map((paragraph) => (
               <p key={paragraph.slice(0, 48)}>{paragraph}</p>
             ))}
+            {cityHubLink ? (
+              <p>
+                {cityHubLink.before}{" "}
+                <Link
+                  href={cityHubLink.href}
+                  className="font-medium text-navy underline underline-offset-2 hover:text-emergency"
+                >{cityHubLink.label}</Link>{cityHubLink.after}
+              </p>
+            ) : null}
           </div>
         </div>
       </section>

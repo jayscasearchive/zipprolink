@@ -51,12 +51,14 @@ export type PageVariation = {
   densityBand: DensityBand;
   densityLabel: string;
   densityCopy: string;
+  documentTitle?: string;
   headline: string;
   heroSupport: string;
   asideTitle: string;
   asideBody: string;
   asideMetric: string;
   asideMetricLabel: string;
+  asideDispatchValue?: string;
   chipPrimaryLabel: string;
   chipPrimaryValue: string;
   chipSecondaryLabel: string;
