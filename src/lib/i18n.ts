@@ -14,10 +14,10 @@ export function parseLocale(value: string | undefined): AppLocale {
 }
 
 export const TRACKING_PHONE = {
-  display: "(833) 567-5849",
-  e164: "+18335675849",
-  tel: "tel:+18335675849",
-  schema: "+1-833-567-5849",
+  display: "(844) 505-0917",
+  e164: "+18445050917",
+  tel: "tel:+18445050917",
+  schema: "+1-844-505-0917",
 } as const;
 
 function isPlaceholderPhone(value: string | null | undefined) {

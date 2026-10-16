@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CallToAction } from "@/components/CallToAction";
+import { HoustonCityHub, HoustonHubFaq } from "@/components/HoustonCityHub";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { currentSeoYear } from "@/lib/content";
 import {
@@ -8,8 +10,18 @@ import {
   getCityHubData,
   getCityStaticParams,
 } from "@/lib/directory";
+import {
+  getHoustonHubCopy,
+  isHoustonCityHub,
+} from "@/lib/city-hubs/houston";
 import { getDictionary, isAppLocale } from "@/lib/i18n";
-import { countyPath, directoryPath, localeHomePath } from "@/lib/paths";
+import {
+  countyDisplayName,
+  countyPath,
+  directoryPath,
+  hasCountyName,
+  localeHomePath,
+} from "@/lib/paths";
 import { isPhaseCoverage } from "@/lib/ssot";
 import { serializeJsonLd } from "@/lib/schema";
 
@@ -44,7 +56,12 @@ export async function generateMetadata({
 
   const copy = getDictionary(raw);
   const year = currentSeoYear();
-  const title = copy.cityHubH1(year, hub.cityName, hub.stateId);
+  const houston = isHoustonCityHub(city, state)
+    ? getHoustonHubCopy(raw)
+    : null;
+  const title = houston?.title ?? copy.cityHubH1(year, hub.cityName, hub.stateId);
+  const description =
+    houston?.description ?? copy.cityHubLead(hub.cityName, hub.zips.length);
   const canonical = directoryPath({
     locale: raw,
     service: hub.service.slug,
@@ -54,7 +71,7 @@ export async function generateMetadata({
 
   return {
     title: { absolute: title },
-    description: copy.cityHubLead(hub.cityName, hub.zips.length),
+    description,
     alternates: {
       canonical,
       languages: {
@@ -80,7 +97,7 @@ export async function generateMetadata({
     },
     openGraph: {
       title,
-      description: copy.cityHubLead(hub.cityName, hub.zips.length),
+      description,
       url: canonical,
       siteName: SITE_NAME,
       type: "website",
@@ -101,6 +118,12 @@ export default async function CityHubPage({ params }: CityHubProps) {
 
   const copy = getDictionary(raw);
   const year = currentSeoYear();
+  const houston = isHoustonCityHub(city, state)
+    ? getHoustonHubCopy(raw)
+    : null;
+  const listedZips = houston
+    ? [...hub.zips].sort((a, b) => a.zip_code.localeCompare(b.zip_code, "en"))
+    : hub.zips;
   const pageUrl = `${SITE_URL}${directoryPath({
     locale: raw,
     service: hub.service.slug,
@@ -181,13 +204,20 @@ export default async function CityHubPage({ params }: CityHubProps) {
             </span>
           </nav>
           <h1 className="mt-4 max-w-3xl text-3xl font-semibold tracking-tight sm:text-5xl">
-            {copy.cityHubH1(year, hub.cityName, hub.stateId)}
+            {houston?.h1 ?? copy.cityHubH1(year, hub.cityName, hub.stateId)}
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-white/75">
-            {copy.cityHubLead(hub.cityName, hub.zips.length)}
+            {houston?.lead ?? copy.cityHubLead(hub.cityName, hub.zips.length)}
           </p>
+          {houston ? (
+            <div className="mt-8 max-w-xl">
+              <CallToAction locale={raw} variant="hero" service={hub.service} />
+            </div>
+          ) : null}
         </div>
       </section>
+
+      {houston ? <HoustonCityHub copy={houston} /> : null}
 
       <section className="mx-auto w-full min-w-0 max-w-6xl px-4 py-12 sm:px-6">
         {counties.length > 1 ? (
@@ -214,10 +244,15 @@ export default async function CityHubPage({ params }: CityHubProps) {
           </div>
         ) : null}
         <h2 className="text-2xl font-semibold tracking-tight text-navy">
-          {copy.zipListHeading}
+          {houston?.zipHeading ?? copy.zipListHeading}
         </h2>
+        {houston ? (
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
+            {houston.zipLead}
+          </p>
+        ) : null}
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {hub.zips.map((zip) => (
+          {listedZips.map((zip) => (
             <Link
               key={zip.zip_code}
               href={directoryPath({
@@ -233,10 +268,16 @@ export default async function CityHubPage({ params }: CityHubProps) {
               <p className="text-sm text-slate-500">
                 {zip.city}, {zip.state_id}
               </p>
+              {houston && hasCountyName(zip.county_name) ? (
+                <p className="mt-1 text-xs text-slate-400">
+                  {countyDisplayName(zip.county_name)}
+                </p>
+              ) : null}
             </Link>
           ))}
         </div>
       </section>
+      {houston ? <HoustonHubFaq copy={houston} /> : null}
     </main>
   );
 }
