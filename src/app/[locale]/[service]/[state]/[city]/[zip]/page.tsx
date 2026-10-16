@@ -17,6 +17,7 @@ import { isPhaseCoverage } from "@/lib/ssot";
 import type { DirectoryPageData } from "@/lib/types";
 import { buildPageVariation, localizePageVariation } from "@/lib/variation";
 import type { PageVariation } from "@/lib/variation/types";
+import { overlayZipVariationIfHouston77002 } from "@/lib/zips/houston-77002";
 import {
   getHouston77006HubLink,
   isHouston77006Page,
@@ -27,13 +28,21 @@ function zipPageVariation(
   data: DirectoryPageData,
   locale: AppLocale,
 ): PageVariation {
-  return overlayZipVariationIfHouston77006(
-    localizePageVariation(
-      buildPageVariation(data.service, data.zip),
-      locale,
-      data.service,
-      data.zip,
-    ),
+  const localized = localizePageVariation(
+    buildPageVariation(data.service, data.zip),
+    locale,
+    data.service,
+    data.zip,
+  );
+  const withHouston77006 = overlayZipVariationIfHouston77006(
+    localized,
+    data.zip.city,
+    data.zip.state_id,
+    data.zip.zip_code,
+    locale,
+  );
+  return overlayZipVariationIfHouston77002(
+    withHouston77006,
     data.zip.city,
     data.zip.state_id,
     data.zip.zip_code,
